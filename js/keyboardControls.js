@@ -69,11 +69,20 @@ class KeyboardControls {
         }
     }
     
-    // 启用控制 - 不再需要参数
+    // 启用控制
     enable() {
-        if (this.enabled) return;
+        // 如果已经启用则不做任何操作
+        if (this.enabled) {
+            console.log("键盘控制已经启用，无需再次启用");
+            return;
+        }
         
         console.log("启用键盘控制...");
+        
+        // 先确保已经移除之前的事件监听
+        this.disable();
+        
+        // 标记为启用
         this.enabled = true;
         
         // 添加键盘事件监听
@@ -83,11 +92,17 @@ class KeyboardControls {
         this.log('键盘控制已启用');
     }
     
-    // 禁用控制 - 保留此方法以备未来需要
+    // 禁用控制
     disable() {
-        if (!this.enabled) return;
+        // 如果已经禁用则不做任何操作
+        if (!this.enabled) {
+            console.log("键盘控制已经禁用，无需再次禁用");
+            return;
+        }
         
         console.log("禁用键盘控制...");
+        
+        // 标记为禁用
         this.enabled = false;
         
         // 移除键盘事件监听
@@ -99,6 +114,9 @@ class KeyboardControls {
             this.keys[key] = false;
         }
         
+        // 重置移动状态
+        this.isMoving = false;
+        
         this.log('键盘控制已禁用');
     }
     
@@ -109,19 +127,27 @@ class KeyboardControls {
         // 如果禁用则不处理
         if (!this.enabled) return;
         
-        // 使用keyCode而不是code，兼容性更好
+        // 使用keyCode和key兼容不同浏览器
         const keyCode = event.keyCode;
         
-        // 只处理我们关心的按键
-        if (this.keys.hasOwnProperty(keyCode)) {
-            this.keys[keyCode] = true;
-            console.log(`键 ${keyCode} 已按下，状态设为true`);
-            
-            // 防止按键事件影响浏览器默认行为
-            if ([32, 37, 38, 39, 40].includes(keyCode)) { // 空格和方向键
-                event.preventDefault();
-            }
+        // 检查常用键控制
+        if (event.key === 'w' || event.key === 'W' || keyCode === 87 || keyCode === 38) {
+            this.keys[87] = true;
+        } else if (event.key === 's' || event.key === 'S' || keyCode === 83 || keyCode === 40) {
+            this.keys[83] = true;
+        } else if (event.key === 'a' || event.key === 'A' || keyCode === 65 || keyCode === 37) {
+            this.keys[65] = true;
+        } else if (event.key === 'd' || event.key === 'D' || keyCode === 68 || keyCode === 39) {
+            this.keys[68] = true;
         }
+        
+        // 防止按键事件影响浏览器默认行为
+        if ([32, 37, 38, 39, 40].includes(keyCode)) { // 空格和方向键
+            event.preventDefault();
+        }
+        
+        // 输出当前按键状态
+        this.log(`按键状态: W=${this.keys[87]}, S=${this.keys[83]}, A=${this.keys[65]}, D=${this.keys[68]}`);
     }
     
     // 键盘释放事件处理
@@ -131,26 +157,36 @@ class KeyboardControls {
         // 如果禁用则不处理
         if (!this.enabled) return;
         
-        // 使用keyCode而不是code
+        // 使用keyCode和key兼容不同浏览器
         const keyCode = event.keyCode;
         
-        // 只处理我们关心的按键
-        if (this.keys.hasOwnProperty(keyCode)) {
-            this.keys[keyCode] = false;
-            console.log(`键 ${keyCode} 已释放，状态设为false`);
+        // 检查常用键控制
+        if (event.key === 'w' || event.key === 'W' || keyCode === 87 || keyCode === 38) {
+            this.keys[87] = false;
+        } else if (event.key === 's' || event.key === 'S' || keyCode === 83 || keyCode === 40) {
+            this.keys[83] = false;
+        } else if (event.key === 'a' || event.key === 'A' || keyCode === 65 || keyCode === 37) {
+            this.keys[65] = false;
+        } else if (event.key === 'd' || event.key === 'D' || keyCode === 68 || keyCode === 39) {
+            this.keys[68] = false;
         }
     }
     
     // 更新相机位置 - 适配PointerLockControls
     update() {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
         
         try {
+            // 调试 - 输出按键状态
+            console.log(`更新中，按键状态: W=${this.keys[87]}, S=${this.keys[83]}, A=${this.keys[65]}, D=${this.keys[68]}`);
+            
             // 检查按键状态
-            const movingForward = this.keys[87] || this.keys[38]; // W 或 上箭头
-            const movingBackward = this.keys[83] || this.keys[40]; // S 或 下箭头
-            const movingLeft = this.keys[65] || this.keys[37]; // A 或 左箭头
-            const movingRight = this.keys[68] || this.keys[39]; // D 或 右箭头
+            const movingForward = this.keys[87]; // W
+            const movingBackward = this.keys[83]; // S
+            const movingLeft = this.keys[65]; // A
+            const movingRight = this.keys[68]; // D
             
             // 如果没有按键按下，直接返回
             if (!(movingForward || movingBackward || movingLeft || movingRight)) {
@@ -189,6 +225,9 @@ class KeyboardControls {
                 
                 // 保持在固定高度上 - 锁定Y轴
                 this.camera.position.y = this.fixedHeight;
+                
+                // 调试输出当前相机位置
+                console.log(`相机位置: x=${this.camera.position.x.toFixed(2)}, y=${this.camera.position.y.toFixed(2)}, z=${this.camera.position.z.toFixed(2)}`);
                 
                 // 更新移动状态
                 if (!this.isMoving) {

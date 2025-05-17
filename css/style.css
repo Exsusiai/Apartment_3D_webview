@@ -171,11 +171,27 @@ footer {
     border-radius: 12px;
     text-align: center;
     max-width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .prompt-content h3 {
     margin-top: 0;
     color: white;
+}
+
+.prompt-content .btn.primary {
+    transition: all 0.3s ease;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.prompt-content .btn.primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 #pointerLockPrompt.hidden {
@@ -500,4 +516,32 @@ label {
     .btn {
         width: 100%;
     }
+}
+
+/* ESC退出提示样式 */
+.esc-prompt {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 990;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-left: 3px solid var(--accent-color);
+}
+
+.esc-prompt i {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+}
+
+.esc-prompt.hidden {
+    display: none;
 } 

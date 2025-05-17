@@ -1,5 +1,5 @@
 // 全局变量
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, orbitControls;
 let keyboardControls; // 键盘控制器
 let currentModel = null;
 let isModelLoaded = false;
@@ -10,6 +10,7 @@ let isPointerLocked = false; // 跟踪指针是否锁定
 let eyeHeight = 1.7; // 默认人眼高度（米）
 let floorHeight = 0.0; // 地板高度，默认为0
 let apartmentConfig = null; // 当前公寓配置
+let controlMode = 'fps'; // 控制模式：'fps' 或 'orbit'
 
 // 调试信息输出
 function log(message) {
@@ -124,9 +125,30 @@ function init() {
         const axesHelper = new THREE.AxesHelper(5);
         scene.add(axesHelper);
 
-        // 使用PointerLockControls替代OrbitControls来实现真正的FPS控制
+        // ===== 控制系统初始化 =====
+        
+        // 1. 创建轨道控制器 - OrbitControls
+        orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+        orbitControls.enableDamping = true; // 平滑控制
+        orbitControls.dampingFactor = 0.05;
+        orbitControls.screenSpacePanning = true; // 启用屏幕空间平移，使平移与视角相关
+        orbitControls.minDistance = 1;
+        orbitControls.maxDistance = 50;
+        orbitControls.maxPolarAngle = Math.PI; // 允许完全旋转
+        
+        // 2. 创建FPS控制器 - PointerLockControls
         controls = new THREE.PointerLockControls(camera, renderer.domElement);
         scene.add(controls.getObject());
+        
+        // 3. 初始化键盘控制器
+        keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
+        keyboardControls.setLogCallback(log);
+        keyboardControls.setMovementSpeed(0.05); // 降低移动速度以提供更精细的控制
+        
+        // 默认禁用键盘控制和指针锁定控制
+        keyboardControls.disable();
+        
+        // ===== 事件监听器设置 =====
         
         // 设置指针锁定状态变化的事件监听器
         document.addEventListener('pointerlockchange', onPointerLockChange, false);
@@ -136,19 +158,19 @@ function init() {
         
         // 设置点击事件以启用指针锁定
         const lockPrompt = document.getElementById('pointerLockPrompt');
-        if (lockPrompt) {
-            lockPrompt.addEventListener('click', function() {
-                controls.lock();
+        const enterFPSBtn = document.getElementById('enterFPSBtn');
+        if (lockPrompt && enterFPSBtn) {
+            enterFPSBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                log('点击FPS按钮，尝试锁定指针');
+                if (controlMode === 'fps') {
+                    controls.lock();
+                }
             }, false);
+            // 默认隐藏锁定提示（因为默认是轨道模式）
+            lockPrompt.classList.add('hidden');
         }
         
-        // 初始化键盘控制器
-        keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
-        keyboardControls.setLogCallback(log);
-        
-        // 设置移动速度
-        keyboardControls.setMovementSpeed(0.05); // 降低移动速度以提供更精细的控制
-
         // 监听窗口大小变化
         window.addEventListener('resize', onWindowResize);
 
@@ -166,31 +188,19 @@ function init() {
         document.getElementById('qualitySelector').addEventListener('change', changeQuality);
         document.getElementById('screenshotBtn').addEventListener('click', takeScreenshot);
         document.getElementById('toggleDebugBtn').addEventListener('click', toggleDebug);
+        document.getElementById('toggleControlModeBtn').addEventListener('click', toggleControlMode);
+
+        // 默认设置为轨道控制模式
+        setControlMode('orbit');
 
         // 在控制台输出调试信息
         log('Three.js已初始化. WebGL支持: ' + (!!renderer.capabilities.isWebGL2 ? '是' : '否'));
-        log('FPS风格控制已启用，使用WASD移动和鼠标视角');
+        log('默认启用鼠标轨道控制模式，可点击按钮切换到FPS模式');
 
         // 初始加载第一个模型
         setTimeout(() => {
             loadModel('berlin_pankow');
         }, 500);
-
-        // 检查键盘控制器状态
-        setTimeout(() => {
-            if (keyboardControls) {
-                console.log("键盘控制器状态检查: 已初始化");
-                if (keyboardControls.isEnabled()) {
-                    console.log("键盘控制已启用");
-                }
-            } else {
-                console.error("键盘控制器未正确初始化");
-                // 尝试重新初始化
-                keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
-                keyboardControls.setLogCallback(log);
-                console.log("键盘控制器已重新初始化");
-            }
-        }, 2000);
 
         // 开始动画循环
         animate();
@@ -243,15 +253,30 @@ function detectFloorHeight() {
 
 // 指针锁定状态变化处理函数
 function onPointerLockChange() {
+    const wasLocked = isPointerLocked;
     isPointerLocked = document.pointerLockElement === renderer.domElement;
+    log(`指针锁定状态变化: ${wasLocked} -> ${isPointerLocked}`);
     
-    // 更新UI
+    // 只处理FPS模式下的锁定变化
+    if (controlMode !== 'fps') return;
+    
     const lockPrompt = document.getElementById('pointerLockPrompt');
+    const escPrompt = document.getElementById('escExitPrompt');
+    
     if (isPointerLocked) {
+        // 锁定成功 - 隐藏锁定提示，显示ESC退出提示
         if (lockPrompt) lockPrompt.classList.add('hidden');
+        if (escPrompt) escPrompt.classList.remove('hidden');
         log('FPS控制已启用');
+        
+        if (keyboardControls && !keyboardControls.isEnabled()) {
+            keyboardControls.enable();
+            log('键盘控制器已激活');
+        }
     } else {
+        // 锁定解除 - 显示锁定提示，隐藏ESC退出提示
         if (lockPrompt) lockPrompt.classList.remove('hidden');
+        if (escPrompt) escPrompt.classList.add('hidden');
         log('FPS控制已禁用');
     }
 }
@@ -300,58 +325,83 @@ function toggleDebug() {
 
 // 重置视图
 function resetView() {
-    // 对于PointerLockControls，我们需要直接移动相机对象
-    if (controls) {
-        // 解锁控制，如果当前已锁定
-        if (isPointerLocked) {
-            controls.unlock();
-        }
-        
-        // 获取配置文件中的初始点位置
-        let initX = 0, initZ = 10;
-        if (apartmentConfig && apartmentConfig.camera && apartmentConfig.camera.init_point) {
-            initX = apartmentConfig.camera.init_point[0] || 0;
-            initZ = apartmentConfig.camera.init_point[1] || 10;
-        }
-        
-        // 设置相机位置
-        camera.position.set(initX, floorHeight + eyeHeight, initZ);
-        // 重置相机旋转
+    log('重置视图...');
+    
+    // 获取配置文件中的初始点位置
+    let initX = 0, initZ = 10;
+    if (apartmentConfig && apartmentConfig.camera && apartmentConfig.camera.init_point) {
+        initX = apartmentConfig.camera.init_point[0] || 0;
+        initZ = apartmentConfig.camera.init_point[1] || 10;
+    }
+
+    // 如果在FPS模式下且指针已锁定，先解除锁定
+    if (controlMode === 'fps' && isPointerLocked) {
+        controls.unlock();
+    }
+    
+    // 重置相机位置
+    camera.position.set(initX, floorHeight + eyeHeight, initZ);
+    
+    if (controlMode === 'orbit') {
+        // 轨道控制模式 - 重置目标点
+        orbitControls.target.set(0, floorHeight + eyeHeight, 0);
+        orbitControls.update();
+    } else {
+        // FPS模式 - 重置朝向
         camera.lookAt(0, floorHeight + eyeHeight, 0);
     }
+    
     log('视图已重置');
 }
 
 // 设置特定视角
 function setView(viewType) {
-    if (controls) {
-        // 解锁控制，如果当前已锁定
-        if (isPointerLocked) {
-            controls.unlock();
-        }
-        
-        // 获取配置文件中的初始点位置
-        let initX = 0, initZ = 10;
-        if (apartmentConfig && apartmentConfig.camera && apartmentConfig.camera.init_point) {
-            initX = apartmentConfig.camera.init_point[0] || 0;
-            initZ = apartmentConfig.camera.init_point[1] || 10;
-        }
-        
+    log(`设置视角: ${viewType}`);
+    
+    // 获取配置文件中的初始点位置
+    let initX = 0, initZ = 10;
+    if (apartmentConfig && apartmentConfig.camera && apartmentConfig.camera.init_point) {
+        initX = apartmentConfig.camera.init_point[0] || 0;
+        initZ = apartmentConfig.camera.init_point[1] || 10;
+    }
+    
+    // 如果在FPS模式下且指针已锁定，先解除锁定
+    if (controlMode === 'fps' && isPointerLocked) {
+        controls.unlock();
+    }
+    
+    // 根据视图类型设置相机位置
+    switch(viewType) {
+        case 'top':
+            camera.position.set(0, floorHeight + 15, 0);
+            camera.lookAt(0, floorHeight, 0);
+            break;
+        case 'front':
+            camera.position.set(0, floorHeight + eyeHeight, initZ + 10);
+            camera.lookAt(0, floorHeight + eyeHeight, 0);
+            break;
+        case 'side':
+            camera.position.set(initX + 10, floorHeight + eyeHeight, 0);
+            camera.lookAt(initX, floorHeight + eyeHeight, 0);
+            break;
+    }
+    
+    // 如果是轨道控制模式，需要更新控制器目标
+    if (controlMode === 'orbit' && orbitControls) {
         switch(viewType) {
             case 'top':
-                camera.position.set(0, floorHeight + 10, 0);
-                camera.lookAt(0, floorHeight, 0);
+                orbitControls.target.set(0, floorHeight, 0);
                 break;
             case 'front':
-                camera.position.set(0, floorHeight + eyeHeight, initZ);
-                camera.lookAt(0, floorHeight + eyeHeight, 0);
+                orbitControls.target.set(0, floorHeight + eyeHeight, 0);
                 break;
             case 'side':
-                camera.position.set(initX + 10, floorHeight + eyeHeight, 0);
-                camera.lookAt(initX, floorHeight + eyeHeight, 0);
+                orbitControls.target.set(initX, floorHeight + eyeHeight, 0);
                 break;
         }
+        orbitControls.update();
     }
+    
     log(`已切换到${viewType === 'top' ? '顶视图' : viewType === 'front' ? '正视图' : '侧视图'}`);
 }
 
@@ -701,9 +751,17 @@ function animate() {
     requestAnimationFrame(animate);
     
     try {
-        // 更新键盘控制器 - 仅在指针锁定时启用
-        if (keyboardControls && isPointerLocked) {
-            keyboardControls.update();
+        // 根据当前控制模式更新
+        if (controlMode === 'fps') {
+            // FPS模式下，只在指针锁定时更新键盘控制
+            if (keyboardControls && isPointerLocked) {
+                keyboardControls.update();
+            }
+        } else {
+            // 轨道控制模式
+            if (orbitControls && orbitControls.enabled) {
+                orbitControls.update();
+            }
         }
         
         // 更新视图信息 - 每50帧更新一次
@@ -736,6 +794,193 @@ function updateApartmentName() {
                 selectedOption.textContent = apartmentConfig.name;
                 log(`更新公寓名称为: ${apartmentConfig.name}`);
             }
+        }
+    }
+}
+
+// 切换控制模式
+function toggleControlMode() {
+    const newMode = controlMode === 'fps' ? 'orbit' : 'fps';
+    setControlMode(newMode);
+}
+
+// 设置控制模式
+function setControlMode(mode) {
+    log(`正在切换控制模式: ${controlMode} -> ${mode}`);
+    
+    // 保存当前相机位置和朝向
+    const position = camera.position.clone();
+    const quaternion = camera.quaternion.clone();
+    
+    // 记录之前的模式用于后续判断
+    const previousMode = controlMode;
+    
+    // 如果之前是FPS模式且处于锁定状态，解除锁定
+    if (controlMode === 'fps' && isPointerLocked) {
+        log('解除指针锁定');
+        controls.unlock();
+    }
+    
+    // 完全禁用前一个控制模式
+    if (controlMode === 'fps') {
+        if (keyboardControls) {
+            keyboardControls.disable();
+            log('键盘控制已禁用');
+        }
+        
+        // 隐藏FPS按钮，确保切换模式时它消失
+        const lockPrompt = document.getElementById('pointerLockPrompt');
+        if (lockPrompt) {
+            lockPrompt.classList.add('hidden');
+        }
+        
+        // 同时隐藏ESC退出提示
+        const escPrompt = document.getElementById('escExitPrompt');
+        if (escPrompt) {
+            escPrompt.classList.add('hidden');
+        }
+    } else {
+        if (orbitControls) {
+            orbitControls.enabled = false;
+            log('轨道控制已禁用');
+        }
+    }
+    
+    // 更新控制模式
+    controlMode = mode;
+    
+    // 激活新的控制模式
+    if (mode === 'fps') {
+        // 只显示中央按钮
+        const lockPrompt = document.getElementById('pointerLockPrompt');
+        if (lockPrompt) {
+            lockPrompt.classList.remove('hidden');
+            log('显示指针锁定提示');
+        }
+        
+        if (keyboardControls) {
+            keyboardControls.enable();
+            keyboardControls.setFixedHeight(floorHeight + eyeHeight);
+            log('键盘控制已启用，固定高度为:', (floorHeight + eyeHeight).toFixed(2));
+        }
+        
+        document.getElementById('controlModeText').textContent = '切换到鼠标模式';
+        document.getElementById('toggleControlModeBtn').classList.add('primary');
+        document.getElementById('toggleControlModeBtn').classList.remove('accent');
+        
+        log('已切换至FPS控制模式');
+    } else {
+        if (orbitControls) {
+            // 从FPS模式切换到轨道模式时，基于当前相机朝向设置轨道控制器目标点
+            if (previousMode === 'fps') {
+                // 获取相机朝向
+                const direction = new THREE.Vector3(0, 0, -1);
+                direction.applyQuaternion(quaternion);
+                
+                // 计算目标点 - 当前位置加上朝向方向
+                const targetDistance = 10; // 增加目标点到相机的距离以减少视角变化
+                const targetPoint = position.clone().add(
+                    direction.multiplyScalar(targetDistance)
+                );
+                
+                // 设置轨道控制器的目标点
+                orbitControls.target.copy(targetPoint);
+
+                // 重要 - 重置控制器状态，防止突然移动
+                orbitControls.saveState();
+                orbitControls.dampingFactor = 0.1; // 暂时增加阻尼以减轻过渡时的晃动
+                
+                // 动态调整旋转中心 - 在平滑过渡后300毫秒开始
+                // 使用setTimeout而不是立即执行，以确保先完成平滑过渡
+                setTimeout(() => {
+                    // 将旋转中心逐渐过渡回场景中心点附近
+                    // 检测场景中是否有模型，如果有则使用模型中心，否则使用原点
+                    let targetCenter = new THREE.Vector3(0, floorHeight + 1.5, 0);
+                    
+                    if (currentModel) {
+                        // 计算模型的边界盒中心
+                        const box = new THREE.Box3().setFromObject(currentModel);
+                        box.getCenter(targetCenter);
+                        // 确保高度合适
+                        targetCenter.y = floorHeight + 1.5;
+                    }
+                    
+                    log('开始调整轨道控制器旋转中心至场景中心');
+                    
+                    // 动画过渡到新的旋转中心
+                    const startPoint = orbitControls.target.clone();
+                    const duration = 500; // 持续500毫秒，缩短动画时间
+                    const startTime = Date.now();
+                    
+                    function animateTargetTransition() {
+                        const elapsedTime = Date.now() - startTime;
+                        const progress = Math.min(elapsedTime / duration, 1);
+                        
+                        if (progress < 1) {
+                            // 线性插值计算当前目标点
+                            orbitControls.target.lerpVectors(
+                                startPoint,
+                                targetCenter,
+                                progress
+                            );
+                            requestAnimationFrame(animateTargetTransition);
+                        } else {
+                            // 完成过渡
+                            orbitControls.target.copy(targetCenter);
+                            log('轨道控制器旋转中心已调整完成');
+                        }
+                        
+                        // 每次更新后需要更新控制器
+                        orbitControls.update();
+                    }
+                    
+                    // 开始动画
+                    animateTargetTransition();
+                    
+                    // 恢复正常阻尼系数
+                    orbitControls.dampingFactor = 0.05;
+                }, 300);
+                
+                log('基于FPS视角设置了轨道控制器目标点');
+            }
+            
+            orbitControls.enabled = true;
+            orbitControls.update();
+            log('轨道控制已启用');
+        }
+        
+        // 隐藏中央按钮
+        const lockPrompt = document.getElementById('pointerLockPrompt');
+        if (lockPrompt) {
+            lockPrompt.classList.add('hidden');
+            log('隐藏指针锁定提示');
+        }
+        
+        document.getElementById('controlModeText').textContent = '切换到FPS模式';
+        document.getElementById('toggleControlModeBtn').classList.remove('primary');
+        document.getElementById('toggleControlModeBtn').classList.add('accent');
+        
+        log('已切换至鼠标轨道控制模式');
+    }
+    
+    updateControlsInfoText();
+}
+
+// 更新控制说明文本
+function updateControlsInfoText() {
+    const controlsInfo = document.querySelector('.controls-info');
+    if (controlsInfo) {
+        if (controlMode === 'fps') {
+            controlsInfo.innerHTML = `
+                <p><i class='bx bx-mouse'></i> 鼠标：控制视角</p>
+                <p><i class='bx bx-joystick'></i> WASD：前后左右移动</p>
+            `;
+        } else {
+            controlsInfo.innerHTML = `
+                <p><i class='bx bx-mouse'></i> 鼠标左键：旋转视角</p>
+                <p><i class='bx bx-mouse-alt'></i> 鼠标右键：平移</p>
+                <p><i class='bx bx-mouse-alt'></i> 滚轮：缩放</p>
+            `;
         }
     }
 }

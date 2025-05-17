@@ -33,6 +33,9 @@
                         <p><i class='bx bx-joystick'></i> WASD：前后左右移动</p>
                     </div>
                     <div class="controls-group mt-10">
+                        <button id="toggleControlModeBtn" class="btn primary full-width"><i class='bx bx-transfer'></i> <span id="controlModeText">切换到鼠标模式</span></button>
+                    </div>
+                    <div class="controls-group mt-10">
                         <button id="viewTopBtn" class="btn secondary"><i class='bx bx-up-arrow'></i> 顶视图</button>
                         <button id="viewFrontBtn" class="btn secondary"><i class='bx bx-right-arrow'></i> 正视图</button>
                         <button id="viewSideBtn" class="btn secondary"><i class='bx bx-right-arrow-alt'></i> 侧视图</button>
@@ -77,6 +80,9 @@
                         <div id="rotationInfo" class="info-item">视角: 0°</div>
                         <div id="zoomInfo" class="info-item">高度: 1.7m</div>
                     </div>
+                    <div id="escExitPrompt" class="esc-prompt hidden">
+                        <i class='bx bx-exit'></i> 按ESC退出FPS模式
+                    </div>
                     <div id="loadingOverlay">
                         <div class="spinner"></div>
                         <div class="loading-text">正在加载模型...</div>
@@ -84,12 +90,9 @@
                             <div class="progress-bar"></div>
                         </div>
                     </div>
-                    <div id="pointerLockPrompt" class="center-screen">
+                    <div id="pointerLockPrompt" class="center-screen hidden">
                         <div class="prompt-content">
-                            <h3>点击以启用FPS控制</h3>
-                            <p>WASD或方向键：移动</p>
-                            <p>鼠标：控制视角</p>
-                            <p>ESC：退出FPS模式</p>
+                            <button id="enterFPSBtn" class="btn primary full-width" style="font-size:1.3rem;padding:1.2em 2em;">点击以启用FPS控制</button>
                         </div>
                     </div>
                 </div>
