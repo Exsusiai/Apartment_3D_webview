@@ -327,6 +327,13 @@ function toggleDebug() {
 function resetView() {
     log('重置视图...');
     
+    // 移除可能存在的错误消息
+    const errorMsg = document.getElementById('errorMessage');
+    if (errorMsg) {
+        errorMsg.remove();
+        log('重置视图时清除了错误消息');
+    }
+    
     // 获取配置文件中的初始点位置
     let initX = 0, initZ = 10;
     if (apartmentConfig && apartmentConfig.camera && apartmentConfig.camera.init_point) {
@@ -522,6 +529,13 @@ function loadModel(apartmentName) {
     log('开始加载模型: ' + apartmentName);
     isModelLoaded = false;
     
+    // 移除可能存在的错误消息
+    const errorMsg = document.getElementById('errorMessage');
+    if (errorMsg) {
+        errorMsg.remove();
+        log('清除了先前的错误消息');
+    }
+    
     // 显示加载覆盖层
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -701,6 +715,13 @@ function loadApartmentModel(apartmentName) {
                     const overlay = document.getElementById('loadingOverlay');
                     if (overlay) {
                         overlay.classList.remove('visible');
+                    }
+
+                    // 移除错误消息（如果存在）
+                    const errorMsg = document.getElementById('errorMessage');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                        log('清除了先前的错误消息');
                     }
 
                     // 重置相机和控制器
