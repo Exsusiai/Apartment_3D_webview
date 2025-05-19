@@ -1,150 +1,152 @@
-# 我的公寓3D模型展示
+# 3D Apartment Model Viewer
 
-这是一个简单的静态网页应用，用于展示公寓的3D扫描模型。用户可以轻松查看公寓的空间布局和细节，并可以在两种控制模式间切换：传统的鼠标轨道控制模式和FPS风格控制模式。这种设计满足了不同用户的浏览偏好，提供身临其境的体验。
+[中文版](README_CN.md)
 
-## 功能特点
+This is a simple static web application designed to showcase 3D scanned apartment models. Users can easily explore the spatial layout and details of apartments while switching between two control modes: traditional mouse orbit controls and FPS-style controls. This design caters to different browsing preferences, providing an immersive experience.
 
-- 加载和显示OBJ格式的3D公寓模型
-- 双控制模式系统：
-  - **鼠标轨道模式**：传统旋转/平移/缩放控制
-  - **FPS风格模式**：WASD键移动，鼠标控制视角
-- 模式间无缝切换，保持视角连续性
-- 直观的界面提示（ESC退出FPS模式）
-- 自由穿越空间，无碰撞限制
-- 预设视角快速切换（顶视图、侧视图等）
-- 线框模式支持，查看模型结构
-- 简洁清晰的用户界面
-- 响应式设计，适配不同设备
-- 多公寓模型切换（可扩展）
+## Features
 
-## 技术栈
+- Load and display 3D apartment models in OBJ format
+- Dual control system:
+  - **Mouse orbit mode**: Traditional rotation/pan/zoom controls
+  - **FPS-style mode**: WASD key movement with mouse view control
+- Seamless switching between modes while maintaining view continuity
+- Intuitive interface prompts (ESC to exit FPS mode)
+- Free space traversal without collision constraints
+- Quick switching between preset views (top view, front view, etc.)
+- Wireframe mode support to examine model structure
+- Clean and clear user interface
+- Responsive design for different devices
+- Multiple apartment model selection (expandable)
+
+## Technology Stack
 
 - HTML5
 - CSS3
 - JavaScript (ES6+)
-- Three.js（WebGL 3D库）
+- Three.js (WebGL 3D library)
 
-## 项目结构
+## Project Structure
 
 ```
 My_Apartment_Web/
-├── index.html          # 主页面
+├── index.html          # Main page
 ├── css/
-│   └── style.css       # 样式文件
+│   └── style.css       # Stylesheet
 ├── js/
-│   ├── main.js         # 主JavaScript逻辑
-│   └── keyboardControls.js  # 键盘控制模块（FPS移动）
-└── Apartments/         # 3D模型文件夹
-    ├── berlin_pankow/  # 柏林潘科区公寓模型
-    │   ├── textured_output.obj  # OBJ模型文件
-    │   ├── textured_output.mtl  # 材质文件
-    │   ├── textured_output.jpg  # 纹理图片
-    │   └── config.json  # 公寓配置文件
-    └── example_apartment/  # 示例公寓模型
-        └── config.json  # 公寓配置文件
+│   ├── main.js         # Main JavaScript logic
+│   └── keyboardControls.js  # Keyboard control module (for FPS movement)
+└── Apartments/         # 3D model folder
+    ├── berlin_pankow/  # Berlin Pankow apartment model
+    │   ├── textured_output.obj  # OBJ model file
+    │   ├── textured_output.mtl  # Material file
+    │   ├── textured_output.jpg  # Texture image
+    │   └── config.json  # Apartment configuration file
+    └── example_apartment/  # Example apartment model
+        └── config.json  # Apartment configuration file
 ```
 
-## 使用方法
+## Usage Instructions
 
-### 启动项目
-**重要提示：** 必须使用本地HTTP服务器运行项目，直接打开HTML文件将无法正确加载3D模型（受浏览器CORS安全策略限制）。
+### Starting the Project
+**Important Note:** The project must be run with a local HTTP server. Opening the HTML file directly will fail to load the 3D models correctly (due to browser CORS security policies).
 
 ```bash
-# 导航到项目目录
+# Navigate to the project directory
 cd My_Apartment_Web
 
-# 使用Node.js的serve工具（推荐方式）
+# Using Node.js serve tool (recommended)
 npx serve -p 8080
 
-# 或使用Python HTTP服务器
+# Or using Python HTTP server
 python -m http.server
 python3 -m http.server
 ```
 
-然后在浏览器中访问 `http://localhost:8080` 或 `http://localhost:8000`
+Then access `http://localhost:8080` or `http://localhost:8000` in your browser.
 
-### 控制指南
+### Control Guide
 
-#### 切换控制模式
-- 点击界面左侧的"切换到FPS模式"或"切换到鼠标模式"按钮在两种模式间切换
+#### Switching Control Modes
+- Click the "Switch to FPS mode" or "Switch to Mouse mode" button on the left side of the interface to toggle between the two modes
 
-#### 鼠标轨道模式（默认）
-- **鼠标左键拖动**：旋转视角
-- **鼠标右键拖动**：平移视角（基于屏幕空间，跟随当前相机方向）
-- **鼠标滚轮**：缩放（靠近/远离）
+#### Mouse Orbit Mode (Default)
+- **Left mouse button drag**: Rotate view
+- **Right mouse button drag**: Pan view (in screen space, following current camera direction)
+- **Mouse wheel**: Zoom (in/out)
 
-#### FPS风格模式
-1. 点击"切换到FPS模式"按钮
-2. 点击出现的"点击以启用FPS控制"按钮锁定鼠标指针
-3. 使用以下控制：
-   - **WASD 键**：控制前后左右移动
-   - **鼠标**：控制视角方向
-   - **ESC键**：退出FPS模式（屏幕左上角会有提示）
-4. 移动不受重力或碰撞限制，可以自由穿越空间
+#### FPS-style Mode
+1. Click the "Switch to FPS mode" button
+2. Click the "Click to enable FPS controls" button that appears to lock the mouse pointer
+3. Use the following controls:
+   - **WASD keys**: Control forward, backward, left, right movement
+   - **Mouse**: Control view direction
+   - **ESC key**: Exit FPS mode (prompt will appear in top-left)
+4. Movement is unrestricted by gravity or collisions, allowing free traversal of space
 
-### 基本操作
-1. 从下拉菜单中选择要查看的公寓
-2. 等待模型加载完成
-3. 选择偏好的控制模式（鼠标轨道或FPS）
-4. 使用界面中的控制按钮：
-   - "顶视图"、"正视图"、"侧视图"按钮快速切换预设视角
-   - "重置视图"按钮可以将视角恢复到初始状态
-   - "切换线框模式"可以查看模型的线框结构
-   - 调整"渲染质量"以平衡性能和显示效果
-   - 使用"保存截图"按钮保存当前视图为图片
+### Basic Operations
+1. Select the apartment to view from the dropdown menu
+2. Wait for the model to load
+3. Choose your preferred control mode (mouse orbit or FPS)
+4. Use the control buttons in the interface:
+   - "Top view", "Front view", "Side view" buttons to quickly switch between preset views
+   - "Reset view" button to restore the view to its initial state
+   - "Toggle wireframe mode" to see the model's wireframe structure
+   - Adjust "Render quality" to balance performance and display quality
+   - Use "Save screenshot" button to save the current view as an image
 
-## 添加新的公寓模型
+## Adding New Apartment Models
 
-要添加新的公寓模型，请按照以下步骤操作：
+To add a new apartment model, follow these steps:
 
-1. 在`Apartments`文件夹中创建新的子文件夹，使用公寓名称作为文件夹名
-2. 将OBJ模型文件、MTL材质文件和纹理图片放入该文件夹
-3. 创建`config.json`配置文件设置公寓参数：
+1. Create a new subfolder in the `Apartments` folder, using the apartment name as the folder name
+2. Place the OBJ model file, MTL material file, and texture images in this folder
+3. Create a `config.json` configuration file to set apartment parameters:
    ```json
    {
-       "name": "公寓显示名称",
+       "name": "Apartment Display Name",
        "camera": {
            "height": 1.7,
            "init_point": [0, 10]
        }
    }
    ```
-4. 在`index.html`文件中的`apartmentSelector`选择器中添加新的选项：
+4. Add a new option in the `apartmentSelector` selector in the `index.html` file:
    ```html
    <select id="apartmentSelector">
-       <option value="berlin_pankow">柏林潘科区公寓</option>
-       <option value="新公寓文件夹名称">新公寓显示名称</option>
+       <option value="berlin_pankow">Berlin Pankow Apartment</option>
+       <option value="new_apartment_folder_name">New Apartment Display Name</option>
    </select>
    ```
 
-## 技术说明
+## Technical Details
 
-### 双模式控制系统
-应用使用两种互补的控制系统：
-- **轨道控制模式**：基于Three.js的OrbitControls，适合传统3D浏览
-  - 旋转中心智能调整，确保轨道控制始终围绕场景中心
-  - 屏幕空间平移，使平移方向与当前视角保持一致
-- **FPS控制模式**：
-  - PointerLockControls处理鼠标锁定和视角旋转
-  - 自定义KeyboardControls模块处理WASD键移动
-  - 模式间平滑过渡，保持视角连续性
+### Dual Mode Control System
+The application uses two complementary control systems:
+- **Orbit Controls Mode**: Based on Three.js OrbitControls, suitable for traditional 3D browsing
+  - Smart adjustment of rotation center, ensuring orbit controls always revolve around scene center
+  - Screen space panning, keeping pan direction consistent with current view
+- **FPS Controls Mode**:
+  - PointerLockControls handles mouse locking and view rotation
+  - Custom KeyboardControls module handles WASD key movement
+  - Smooth transition between modes, maintaining view continuity
 
-### 配置文件系统
-每个公寓模型可以通过`config.json`文件进行自定义配置：
-- 自定义名称
-- 指定相机高度（人眼高度）
-- 设置初始视角位置
+### Configuration File System
+Each apartment model can be customized via a `config.json` file:
+- Custom name
+- Camera height specification (eye level)
+- Initial view position setting
 
-### 本地开发注意事项
-由于浏览器的安全限制（CORS策略），在开发过程中必须使用本地HTTP服务器加载3D模型。直接打开HTML文件会导致模型加载失败。
+### Local Development Notes
+Due to browser security restrictions (CORS policies), a local HTTP server must be used to load 3D models during development. Opening the HTML file directly will result in model loading failure.
 
-## 浏览器兼容性
+## Browser Compatibility
 
 - Chrome 90+
 - Firefox 90+
 - Safari 14+
 - Edge 90+
 
-## 许可证
+## License
 
 MIT 
