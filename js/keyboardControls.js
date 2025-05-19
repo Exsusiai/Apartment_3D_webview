@@ -6,7 +6,7 @@
 // 确认脚本已加载
 console.log("keyboardControls.js 已加载");
 
-class KeyboardControls {
+export class KeyboardControls {
     constructor(camera, scene, domElement) {
         console.log("初始化键盘控制...");
         this.camera = camera;
@@ -198,57 +198,69 @@ class KeyboardControls {
             }
             
             // 获取相机的朝向，用于确定移动方向
-            const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion);
-            direction.y = 0; // 保持在水平面上移动
+            const direction = new THREE.Vector3();
+            this.camera.getWorldDirection(direction);
+            
+            // 归一化方向向量，确保移动速度一致
             direction.normalize();
             
-            // 计算右方向向量
-            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
-            right.y = 0;
-            right.normalize();
+            // 获取右向量 (叉乘世界的上向量和相机的前向量)
+            const right = new THREE.Vector3();
+            right.crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
             
             // 计算移动向量
             const moveVector = new THREE.Vector3(0, 0, 0);
             
-            // 前后移动
-            if (movingForward) moveVector.add(direction.clone().multiplyScalar(this.movementSpeed));
-            if (movingBackward) moveVector.add(direction.clone().multiplyScalar(-this.movementSpeed));
-            
-            // 左右移动
-            if (movingLeft) moveVector.add(right.clone().multiplyScalar(-this.movementSpeed));
-            if (movingRight) moveVector.add(right.clone().multiplyScalar(this.movementSpeed));
-            
-            // 应用移动
-            if (moveVector.length() > 0) {
-                // 直接移动相机
-                this.camera.position.add(moveVector);
-                
-                // 保持在固定高度上 - 锁定Y轴
-                this.camera.position.y = this.fixedHeight;
-                
-                // 调试输出当前相机位置
-                console.log(`相机位置: x=${this.camera.position.x.toFixed(2)}, y=${this.camera.position.y.toFixed(2)}, z=${this.camera.position.z.toFixed(2)}`);
-                
-                // 更新移动状态
-                if (!this.isMoving) {
-                    this.isMoving = true;
-                    this.log('开始移动');
-                }
+            if (movingForward) {
+                moveVector.add(direction);
+            }
+            if (movingBackward) {
+                moveVector.sub(direction);
+            }
+            if (movingRight) {
+                moveVector.add(right);
+            }
+            if (movingLeft) {
+                moveVector.sub(right);
             }
             
+            // 归一化移动向量，避免对角移动速度更快
+            moveVector.normalize();
+            
+            // 应用移动速度
+            moveVector.multiplyScalar(this.movementSpeed);
+            
+            // 只在xz平面移动 (y轴保持不变)
+            moveVector.y = 0;
+            
+            // 记录当前高度
+            const currentY = this.camera.position.y;
+            
+            // 更新相机位置
+            this.camera.position.add(moveVector);
+            
+            // 重置为固定高度
+            this.camera.position.y = this.fixedHeight;
+            
+            // 如果刚开始移动，记录状态
+            if (!this.isMoving) {
+                this.isMoving = true;
+                this.log('开始移动');
+            }
+            
+            console.log(`相机位置: x=${this.camera.position.x.toFixed(2)}, y=${this.camera.position.y.toFixed(2)}, z=${this.camera.position.z.toFixed(2)}`);
         } catch (error) {
-            console.error("键盘控制更新错误:", error);
-            this.log('更新出错: ' + error.message);
+            console.error('键盘控制更新时出错:', error);
         }
     }
     
     // 设置移动速度
     setMovementSpeed(speed) {
         this.movementSpeed = speed;
-        this.log(`移动速度已调整为: ${speed}`);
+        this.log(`移动速度已设置为: ${speed}`);
     }
     
-    // 检查是否启用
+    // 检查控制是否启用
     isEnabled() {
         return this.enabled;
     }
