@@ -331,16 +331,188 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         let isWireframe = false;
         let currentControlMode = 'orbit'; // 'orbit' or 'fps'
         let animationId = null; // 用于清理动画循环
+        let keyboardControls = null; // 键盘控制器
         
         // 公寓配置
         const apartmentConfig = ${JSON.stringify(apartment.config)};
         const modelPath = "${apartment.modelPath}";
+        
+        // 键盘控制类 - 完整的WASD移动逻辑
+        class KeyboardControls {
+            constructor(camera, scene, domElement) {
+                this.camera = camera;
+                this.scene = scene;
+                this.domElement = domElement;
+                
+                // 控制状态
+                this.enabled = false;
+                this.isMoving = false;
+                
+                // 移动参数
+                this.movementSpeed = 0.05;
+                this.fixedHeight = this.camera.position.y;
+                
+                // 按键状态
+                this.keys = {
+                    87: false, // W
+                    83: false, // S
+                    65: false, // A
+                    68: false, // D
+                    38: false, // 上箭头
+                    40: false, // 下箭头
+                    37: false, // 左箭头
+                    39: false  // 右箭头
+                };
+                
+                // 绑定事件处理函数
+                this._onKeyDown = this._onKeyDown.bind(this);
+                this._onKeyUp = this._onKeyUp.bind(this);
+            }
+            
+            enable() {
+                if (this.enabled) return;
+                
+                this.enabled = true;
+                document.addEventListener('keydown', this._onKeyDown, false);
+                document.addEventListener('keyup', this._onKeyUp, false);
+                console.log('键盘控制已启用');
+            }
+            
+            disable() {
+                if (!this.enabled) return;
+                
+                this.enabled = false;
+                document.removeEventListener('keydown', this._onKeyDown, false);
+                document.removeEventListener('keyup', this._onKeyUp, false);
+                
+                // 重置按键状态
+                for (let key in this.keys) {
+                    this.keys[key] = false;
+                }
+                this.isMoving = false;
+                console.log('键盘控制已禁用');
+            }
+            
+            _onKeyDown(event) {
+                if (!this.enabled) return;
+                
+                const keyCode = event.keyCode;
+                
+                // 检查移动键
+                if (event.key === 'w' || event.key === 'W' || keyCode === 87 || keyCode === 38) {
+                    this.keys[87] = true;
+                } else if (event.key === 's' || event.key === 'S' || keyCode === 83 || keyCode === 40) {
+                    this.keys[83] = true;
+                } else if (event.key === 'a' || event.key === 'A' || keyCode === 65 || keyCode === 37) {
+                    this.keys[65] = true;
+                } else if (event.key === 'd' || event.key === 'D' || keyCode === 68 || keyCode === 39) {
+                    this.keys[68] = true;
+                }
+                
+                // 阻止默认行为
+                if ([32, 37, 38, 39, 40, 87, 83, 65, 68].includes(keyCode)) {
+                    event.preventDefault();
+                }
+            }
+            
+            _onKeyUp(event) {
+                if (!this.enabled) return;
+                
+                const keyCode = event.keyCode;
+                
+                // 检查移动键
+                if (event.key === 'w' || event.key === 'W' || keyCode === 87 || keyCode === 38) {
+                    this.keys[87] = false;
+                } else if (event.key === 's' || event.key === 'S' || keyCode === 83 || keyCode === 40) {
+                    this.keys[83] = false;
+                } else if (event.key === 'a' || event.key === 'A' || keyCode === 65 || keyCode === 37) {
+                    this.keys[65] = false;
+                } else if (event.key === 'd' || event.key === 'D' || keyCode === 68 || keyCode === 39) {
+                    this.keys[68] = false;
+                }
+            }
+            
+            update() {
+                if (!this.enabled) return;
+                
+                try {
+                    // 检查按键状态
+                    const movingForward = this.keys[87]; // W
+                    const movingBackward = this.keys[83]; // S
+                    const movingLeft = this.keys[65]; // A
+                    const movingRight = this.keys[68]; // D
+                    
+                    // 如果没有按键按下，直接返回
+                    if (!(movingForward || movingBackward || movingLeft || movingRight)) {
+                        if (this.isMoving) {
+                            this.isMoving = false;
+                        }
+                        return;
+                    }
+                    
+                    // 获取相机的朝向
+                    const direction = new THREE.Vector3();
+                    this.camera.getWorldDirection(direction);
+                    direction.normalize();
+                    
+                    // 获取右向量
+                    const right = new THREE.Vector3();
+                    right.crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
+                    
+                    // 计算移动向量
+                    const moveVector = new THREE.Vector3(0, 0, 0);
+                    
+                    if (movingForward) {
+                        moveVector.add(direction);
+                    }
+                    if (movingBackward) {
+                        moveVector.sub(direction);
+                    }
+                    if (movingRight) {
+                        moveVector.add(right);
+                    }
+                    if (movingLeft) {
+                        moveVector.sub(right);
+                    }
+                    
+                    // 归一化移动向量
+                    moveVector.normalize();
+                    moveVector.multiplyScalar(this.movementSpeed);
+                    
+                    // 只在xz平面移动
+                    moveVector.y = 0;
+                    
+                    // 更新相机位置
+                    this.camera.position.add(moveVector);
+                    this.camera.position.y = this.fixedHeight;
+                    
+                    if (!this.isMoving) {
+                        this.isMoving = true;
+                    }
+                } catch (error) {
+                    console.error('键盘控制更新时出错:', error);
+                }
+            }
+            
+            setFixedHeight(height) {
+                this.fixedHeight = height;
+            }
+            
+            setMovementSpeed(speed) {
+                this.movementSpeed = speed;
+            }
+        }
         
         // 清理之前的资源
         function cleanup() {
             if (animationId) {
                 cancelAnimationFrame(animationId);
                 animationId = null;
+            }
+            
+            if (keyboardControls) {
+                keyboardControls.disable();
+                keyboardControls = null;
             }
             
             if (renderer) {
@@ -358,6 +530,8 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             // 清理事件监听器
             window.removeEventListener('resize', onWindowResize);
             document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('pointerlockchange', onPointerLockChange);
+            document.removeEventListener('pointerlockerror', onPointerLockError);
         }
         
         // 初始化3D场景
@@ -422,9 +596,14 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             pointerLockControls = new THREE.PointerLockControls(camera, renderer.domElement);
             scene.add(pointerLockControls.getObject());
             
+            // 键盘控制器
+            keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
+            keyboardControls.setFixedHeight(apartmentConfig.camera.height);
+            
             // 默认使用轨道控制器
             orbitControls.enabled = true;
             pointerLockControls.enabled = false;
+            keyboardControls.disable();
         }
         
         function setupLighting() {
@@ -520,6 +699,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             // FPS模式相关
             document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
             
+            // 指针锁定状态变化监听
+            document.addEventListener('pointerlockchange', onPointerLockChange);
+            document.addEventListener('pointerlockerror', onPointerLockError);
+            
             // 键盘事件
             document.addEventListener('keydown', onKeyDown);
             
@@ -530,7 +713,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         function toggleControlMode() {
             if (currentControlMode === 'orbit') {
                 // 切换到FPS模式
+                currentControlMode = 'fps';
+                orbitControls.enabled = false;
                 document.getElementById('pointerLockPrompt').classList.remove('hidden');
+                document.getElementById('controlModeText').textContent = '切换到鼠标模式';
             } else {
                 // 切换到轨道模式
                 exitFPSMode();
@@ -538,21 +724,32 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function enterFPSMode() {
+            // 进入指针锁定状态
             pointerLockControls.lock();
-            currentControlMode = 'fps';
-            orbitControls.enabled = false;
             pointerLockControls.enabled = true;
+            keyboardControls.enable(); // 启用键盘控制
             document.getElementById('pointerLockPrompt').classList.add('hidden');
             document.getElementById('escExitPrompt').classList.remove('hidden');
-            document.getElementById('controlModeText').textContent = '切换到鼠标模式';
+        }
+        
+        function exitPointerLock() {
+            // 退出指针锁定状态，但仍在FPS模式
+            pointerLockControls.unlock();
+            pointerLockControls.enabled = false;
+            keyboardControls.disable(); // 禁用键盘控制
+            document.getElementById('escExitPrompt').classList.add('hidden');
+            document.getElementById('pointerLockPrompt').classList.remove('hidden');
         }
         
         function exitFPSMode() {
+            // 完全退出FPS模式，回到轨道模式
             pointerLockControls.unlock();
             currentControlMode = 'orbit';
             orbitControls.enabled = true;
             pointerLockControls.enabled = false;
+            keyboardControls.disable(); // 禁用键盘控制
             document.getElementById('escExitPrompt').classList.add('hidden');
+            document.getElementById('pointerLockPrompt').classList.add('hidden');
             document.getElementById('controlModeText').textContent = '切换到FPS模式';
         }
         
@@ -631,8 +828,11 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function onKeyDown(event) {
-            if (event.code === 'Escape' && currentControlMode === 'fps') {
-                exitFPSMode();
+            // 只处理ESC键，其他键让键盘控制器处理
+            if (event.code === 'Escape' && currentControlMode === 'fps' && pointerLockControls.enabled) {
+                exitPointerLock(); // 只退出指针锁定，不退出FPS模式
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
         
@@ -649,7 +849,34 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 orbitControls.update();
             }
             
+            // 更新键盘控制
+            if (keyboardControls && currentControlMode === 'fps') {
+                keyboardControls.update();
+            }
+            
             renderer.render(scene, camera);
+        }
+        
+        function onPointerLockChange() {
+            if (currentControlMode === 'fps') {
+                if (document.pointerLockElement === renderer.domElement) {
+                    // 进入指针锁定状态
+                    pointerLockControls.enabled = true;
+                    keyboardControls.enable();
+                    document.getElementById('pointerLockPrompt').classList.add('hidden');
+                    document.getElementById('escExitPrompt').classList.remove('hidden');
+                } else {
+                    // 退出指针锁定状态
+                    pointerLockControls.enabled = false;
+                    keyboardControls.disable();
+                    document.getElementById('escExitPrompt').classList.add('hidden');
+                    document.getElementById('pointerLockPrompt').classList.remove('hidden');
+                }
+            }
+        }
+        
+        function onPointerLockError() {
+            console.error('Pointer lock failed');
         }
         
         // 初始化
