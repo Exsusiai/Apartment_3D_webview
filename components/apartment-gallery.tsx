@@ -30,8 +30,8 @@ function ApartmentCard({
   // 计算卡片间距和位置
   const spacingClass = cn(
     "relative transition-all duration-700",
-    // 垂直间距 - 减小第一个卡片的上边距，使其更容易被看到
-    index === 0 ? "mt-4" : "", // 从mt-16改为mt-4
+    // 垂直间距 - 第一个卡片紧贴hero section，确保滚动后Browse按钮不可见
+    index === 0 ? "mt-0" : "", // 从mt-4改为mt-0，让第一个卡片更贴近hero section
     !isLast ? "mb-24 md:mb-28 lg:mb-32" : "mb-16", // 确保最后一个卡片也有底部间距
     // 动画效果
     isIntersecting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16",

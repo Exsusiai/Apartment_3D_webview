@@ -10,88 +10,121 @@ export function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false)
   // 跟踪用户是否已浏览过内容
   const [hasViewedContent, setHasViewedContent] = useState(false)
+  // 添加初始化状态
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // 页面加载后触发动画和检查状态
   useEffect(() => {
+    // 确保状态初始化
+    SessionState.init()
+    
     // 检查用户是否已浏览过内容
-    setHasViewedContent(SessionState.hasViewedContent())
+    const currentState = SessionState.hasViewedContent()
+    setHasViewedContent(currentState)
 
+    // 短暂延迟确保组件完全加载
     const timer = setTimeout(() => {
       setIsLoaded(true)
-    }, 300) // 短暂延迟以确保DOM已完全加载
+      setIsInitialized(true)
+    }, 300)
 
     return () => clearTimeout(timer)
   }, [])
 
-  // 添加滚动监听，确保状态在滚动时更新
+  // 优化的滚动监听，减少频率并确保状态同步
   useEffect(() => {
+    if (!isInitialized) return
+
+    let ticking = false
+
     const handleScroll = () => {
-      // 检查状态是否已更新
-      const currentState = SessionState.hasViewedContent()
-      if (currentState !== hasViewedContent) {
-        setHasViewedContent(currentState)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // 检查状态是否已更新
+          const currentState = SessionState.hasViewedContent()
+          if (currentState !== hasViewedContent) {
+            setHasViewedContent(currentState)
+          }
+          ticking = false
+        })
+        ticking = true
       }
     }
 
     // 添加滚动事件监听器
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
 
     // 添加一个定时器，定期检查状态（以防滚动事件不够频繁）
-    const intervalId = setInterval(handleScroll, 500)
+    const intervalId = setInterval(() => {
+      const currentState = SessionState.hasViewedContent()
+      if (currentState !== hasViewedContent) {
+        setHasViewedContent(currentState)
+      }
+    }, 500)
 
     return () => {
       window.removeEventListener("scroll", handleScroll)
       clearInterval(intervalId)
     }
-  }, [hasViewedContent])
+  }, [hasViewedContent, isInitialized])
 
   const handleBrowseClick = () => {
     // 标记用户已浏览过内容
     SessionState.markContentAsViewed()
+    const wasFullScreen = !hasViewedContent // 记录是否从全屏模式开始
     setHasViewedContent(true)
 
-    // 获取画廊元素
-    const galleryElement = document.getElementById("apartment-gallery")
-    if (!galleryElement) return
+    // 使用requestAnimationFrame确保DOM更新完成后再计算位置
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        performScroll(wasFullScreen)
+      })
+    })
+  }
 
+  // 统一的滚动逻辑，减少重复代码
+  const performScroll = (wasFullScreen: boolean) => {
     // 获取第一个卡片元素
     const firstCardElement = document.getElementById("first-apartment-card")
-    if (!firstCardElement) return
-
-    // 获取导航栏高度（用于计算偏移量）
-    const headerElement = document.querySelector("header")
-    const headerHeight = headerElement ? headerElement.offsetHeight : 0
-
-    // 根据当前状态设置不同的偏移量
-    if (!hasViewedContent) {
-      // 首次访问（全屏标题状态）
-      // 计算第一个卡片相对于文档顶部的位置
-      const cardPosition = firstCardElement.getBoundingClientRect().top + window.pageYOffset
-
-      // 设置较小的偏移量，确保第一个卡片在视口中可见
-      // 这里的偏移量需要考虑导航栏高度和一些额外空间
-      const offsetPosition = cardPosition - headerHeight - 20
-
-      // 使用平滑滚动
+    if (!firstCardElement) {
+      console.warn("First apartment card not found, scrolling to fallback position")
+      // 如果找不到目标元素，滚动到一个安全的位置
       window.scrollTo({
-        top: offsetPosition,
+        top: window.innerHeight * 0.8,
         behavior: "smooth",
       })
-    } else {
-      // 后续访问（小标题状态）
-      // 计算画廊相对于文档顶部的位置
-      const galleryPosition = galleryElement.getBoundingClientRect().top + window.pageYOffset
-
-      // 设置较大的偏移量，确保第一个卡片到达网页最上方
-      // 这里的偏移量需要考虑导航栏高度
-      const offsetPosition = galleryPosition - headerHeight
-
-      // 使用平滑滚动
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      })
+      return
     }
+
+    // 获取导航栏高度
+    const headerElement = document.querySelector("header")
+    const headerHeight = headerElement ? headerElement.offsetHeight : 80 // 默认高度80px
+
+    // 计算第一个卡片的位置
+    const cardRect = firstCardElement.getBoundingClientRect()
+    const cardTop = cardRect.top + window.scrollY
+
+    // 根据模式调整滚动位置
+    let scrollPosition
+    if (wasFullScreen) {
+      // 全屏模式：添加额外偏移量
+      const extraOffset = Math.max(80, window.innerHeight * 0.05) // 动态计算额外偏移
+      scrollPosition = cardTop - headerHeight + extraOffset
+    } else {
+      // 非全屏模式：精确对齐到导航栏下方
+      scrollPosition = cardTop - headerHeight + 20 // 添加20px的缓冲
+    }
+
+    // 确保滚动位置不会超出页面范围
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    scrollPosition = Math.min(scrollPosition, maxScroll)
+    scrollPosition = Math.max(0, scrollPosition) // 确保不小于0
+
+    // 使用平滑滚动
+    window.scrollTo({
+      top: scrollPosition,
+      behavior: "smooth",
+    })
 
     // 确保页面可滚动
     document.body.style.overflow = "auto"
@@ -104,7 +137,7 @@ export function HeroSection() {
       className={`relative border-none overflow-hidden transition-all duration-700 ease-in-out ${
         hasViewedContent
           ? "py-16 sm:py-20 md:py-24 pb-6 sm:pb-8 md:pb-12" // 已浏览过内容，使用较小高度
-          : "min-h-[100vh] flex flex-col items-center justify-center" // 首次访问，使用全屏高度
+          : "min-h-[calc(100vh-80px)] flex flex-col items-center justify-center" // 首次访问，使用全屏高度减去导航栏
       }`}
     >
       {/* 背景曲线装饰 - 添加淡入动画 */}

@@ -8,6 +8,7 @@
 - **现代化设计**：采用Next.js + Tailwind CSS构建的响应式界面
 - **优雅的画廊布局**：交替排列的公寓卡片，配有流畅的滚动动画
 - **真实数据驱动**：使用Apartments文件夹中的真实公寓数据
+- **智能预览图系统**：优先使用各公寓文件夹下的`shotcut.png`作为预览图
 - **智能交互**：区分有模型和无模型的公寓，提供不同的交互体验
 
 ### 3D查看器功能
@@ -90,7 +91,7 @@ npm start
 ### 当前公寓数据
 项目目前包含以下公寓数据：
 
-1. **Berlin Pankow公寓** - 完整的3D模型（有OBJ、MTL、纹理文件）
+1. **Berlin Pankow公寓** - 完整的3D模型（有OBJ、MTL、纹理文件 + shotcut.png预览图）
 2. **示例公寓** - 仅配置文件（演示用）
 3. **占位符1** - 预留位置
 4. **占位符2** - 预留位置
@@ -105,6 +106,7 @@ npm start
    ├── textured_output.obj  # 3D模型文件
    ├── textured_output.mtl  # 材质文件
    ├── textured_output.jpg  # 纹理图片
+   ├── shotcut.png          # 预览图片（推荐）
    └── config.json          # 配置文件
    ```
 
@@ -120,7 +122,20 @@ npm start
    ```
 
 3. **更新数据文件** (`utils/apartment-data.ts`)：
-   在`apartments`数组中添加新的公寓数据对象。
+   - 在`apartments`数组中添加新的公寓数据对象
+   - 如果公寓有`shotcut.png`文件，将公寓ID添加到`APARTMENTS_WITH_SHOTCUT`数组中
+
+### 预览图片优先级
+系统会按以下优先级选择预览图片：
+1. **shotcut.png** - 如果存在，优先使用这个专门的预览图
+2. **textured_output.jpg** - 使用3D模型的纹理图片作为备选
+3. **placeholder.svg** - 默认占位符图片
+
+#### 添加shotcut.png预览图
+如果您有公寓的专门预览图片，请：
+1. 将图片命名为`shotcut.png`
+2. 放置在对应的公寓文件夹中
+3. 在`utils/apartment-data.ts`中的`APARTMENTS_WITH_SHOTCUT`数组里添加该公寓的ID
 
 ## 🎮 3D查看器使用指南
 

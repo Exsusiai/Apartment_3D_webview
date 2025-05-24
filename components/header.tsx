@@ -9,9 +9,13 @@ import { SessionState } from "@/utils/state-utils"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isVisible, setIsVisible] = useState(true) // 确保Header始终可见
 
   // 监听滚动事件，控制导航栏样式
   useEffect(() => {
+    // 确保Header可见
+    setIsVisible(true)
+    
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setIsScrolled(true)
@@ -20,7 +24,10 @@ export function Header() {
       }
     }
 
-    window.addEventListener("scroll", handleScroll)
+    // 立即检查当前滚动位置
+    handleScroll()
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -28,8 +35,8 @@ export function Header() {
   const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
 
-    // 确保状态已被标记为已浏览
-    SessionState.markContentAsViewed()
+    // 确保状态已被重置为初始状态
+    SessionState.forceReset()
 
     try {
       // 先尝试使用平滑滚动
@@ -46,6 +53,16 @@ export function Header() {
     // 确保页面可滚动
     document.body.style.overflow = "auto"
     document.documentElement.style.overflow = "auto"
+
+    // 延迟后强制刷新页面状态
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 100)
+  }
+
+  // 如果Header不可见，不渲染
+  if (!isVisible) {
+    return null
   }
 
   return (
