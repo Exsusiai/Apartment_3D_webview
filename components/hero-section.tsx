@@ -151,7 +151,7 @@ export function HeroSection() {
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[-20px]"
           } ${hasViewedContent ? "lg:text-5xl" : ""}`} // 已浏览过内容时使用较小字体
         >
-          The apartment I lived in
+          Immersive 3D Memories of Places I've Lived
         </h1>
         <div
           className={`flex justify-center mb-4 md:mb-8 transition-all duration-1000 delay-300 ease-out ${

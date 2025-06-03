@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
+import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Building } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SessionState } from "@/utils/state-utils"
 
@@ -31,29 +30,44 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // 滚动到页面顶部
+  // 滚动到页面顶部并重置为初始状态
   const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
 
-    // 确保状态已被重置为初始状态
+    // 先重置状态到初始状态
     SessionState.forceReset()
+    
+    // 强制触发重新渲染以立即更新hero-section状态
+    window.dispatchEvent(new Event('resize'))
+    
+    // 延迟滚动，确保状态重置先生效
+    setTimeout(() => {
+      try {
+        // 滚动到页面顶部
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+      } catch (error) {
+        // 兼容性回退
+        document.body.scrollTop = 0 // For Safari
+        document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
+      }
+    }, 50) // 50ms延迟确保状态重置先生效
+  }
 
-    try {
-      // 先尝试使用平滑滚动
+  // 滚动到About部分
+  const scrollToAbout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    
+    const aboutElement = document.getElementById('about')
+    if (aboutElement) {
+      const offsetTop = aboutElement.offsetTop - 100 // 减去header高度的偏移
       window.scrollTo({
-        top: 0,
+        top: offsetTop,
         behavior: "smooth",
       })
-    } catch (error) {
-      // 兼容性回退
-      document.body.scrollTop = 0 // For Safari
-      document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
     }
-
-    // 延迟后强制刷新页面状态
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'))
-    }, 100)
   }
 
   // 如果Header不可见，不渲染
@@ -71,26 +85,41 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <a href="#" onClick={scrollToTop} className="flex items-center gap-2">
-            <Building className="h-5 w-5 text-gray-900" />
-            <h1 className="text-lg font-medium text-gray-900">3D Apartments</h1>
+        <div className="flex flex-col gap-1">
+          <a href="#" onClick={scrollToTop} className="flex items-start gap-3">
+            {/* Logo部分 */}
+            <div className="flex-shrink-0">
+              <Image
+                src="/home-logo.png"
+                alt="Home Logo"
+                width={42}
+                height={42}
+                className="w-10 h-10 object-contain"
+              />
+            </div>
+            {/* 主标题部分 - 与logo同高 */}
+            <div className="flex flex-col justify-between h-10">
+              <h1 className="text-xl font-bold text-gray-900 leading-none">Rooms</h1>
+              <h1 className="text-xl font-bold text-gray-900 leading-none">I've Lived</h1>
+            </div>
           </a>
+          {/* 副标题部分 - 独占一行，与整个上方区块对齐 */}
+          <p className="text-xs text-gray-600 ml-0">A 3D Remembrance Project</p>
         </div>
-        <nav>
-          <ul className="flex gap-6">
+        <nav className="flex items-center">
+          <ul className="flex gap-8">
             <li>
-              <a href="#" onClick={scrollToTop} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#" onClick={scrollToTop} className="text-base font-medium text-gray-600 hover:text-gray-900 transition-colors">
                 Home
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#about" onClick={scrollToAbout} className="text-base font-medium text-gray-600 hover:text-gray-900 transition-colors">
                 About
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <a href="#" className="text-base font-medium text-gray-600 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </li>

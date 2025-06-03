@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ApartmentGallery } from "@/components/apartment-gallery"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
+import { AboutSection } from "@/components/about-section"
 import { ScrollToTopButton } from "@/components/scroll-to-top-button"
 import { SessionState } from "@/utils/state-utils"
 import { PageFixer } from "@/utils/page-fix"
@@ -119,6 +120,8 @@ export default function Home() {
         >
           <ApartmentGallery />
         </div>
+        {/* About部分 - 总是可见，不需要延迟加载 */}
+        <AboutSection />
       </div>
       <ScrollToTopButton />
     </main>
