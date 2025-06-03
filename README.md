@@ -1,107 +1,151 @@
-# 3D Apartment Model Viewer
+# 3D Apartment Showcase Platform
 
-[中文版](README_CN.md)
+[中文版本](README_CN.md) | [English](README.md)
 
-This is a simple static web application designed to showcase 3D scanned apartment models. Users can easily explore the spatial layout and details of apartments while switching between two control modes: traditional mouse orbit controls and FPS-style controls. This design caters to different browsing preferences, providing an immersive experience.
+A modern 3D apartment showcase platform that combines an elegant gallery interface with powerful 3D viewer functionality. This project successfully merges apartment gallery and 3D viewer capabilities into a unified platform.
 
-## Features
+⚠️Note: This is a project generated entirely by AI, and the project code is completely driven by prompt + Cursor + claude 4, so the code and project architecture are not for reference. For the Cursor Rule used in this project, please refer to [Cursor_Rule](cursor_rule.md)
 
-- Load and display 3D apartment models in OBJ format
-- Dual control system:
-  - **Mouse orbit mode**: Traditional rotation/pan/zoom controls
-  - **FPS-style mode**: WASD key movement with mouse view control
-- Seamless switching between modes while maintaining view continuity
-- Intuitive interface prompts (ESC to exit FPS mode)
-- Free space traversal without collision constraints
-- Quick switching between preset views (top view, front view, etc.)
-- Wireframe mode support to examine model structure
-- Clean and clear user interface
-- Responsive design for different devices
-- Multiple apartment model selection (expandable)
+## ✨ Features
 
-## Technology Stack
+### Gallery Interface
+- **Modern Design**: Responsive layout built with Next.js + Tailwind CSS
+- **Elegant Layout**: Alternating apartment cards with smooth scroll animations
+- **Real Data Integration**: Uses actual apartment data from the Apartments folder
+- **Smart Preview System**: Prioritizes `shotcut.png` from apartment folders as preview images
+- **Intelligent Interaction**: Distinguishes between apartments with and without 3D models
 
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- Three.js (WebGL 3D library)
+### 3D Viewer Capabilities
+- **Dual Control Modes**:
+  - **Mouse Orbit Mode**: Traditional rotation/pan/zoom controls
+  - **FPS Mode**: WASD movement + mouse view control
+- **Complete 3D Experience**:
+  - Load OBJ format 3D apartment models
+  - Material and texture support
+  - Multiple preset views (top, front, side views)
+  - Wireframe mode toggle
+  - Render quality adjustment
+  - Screenshot functionality
+- **Seamless Integration**: Full 3D viewer embedded in dialog with all original features
 
-## Project Structure
+## 🛠 Technology Stack
+
+### Frontend Framework
+- **Next.js 15** - React full-stack framework
+- **React 19** - User interface library
+- **TypeScript** - Type-safe JavaScript
+
+### Styling & UI
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible UI component library
+- **Lucide React** - Icon library
+
+### 3D Rendering
+- **Three.js** - WebGL 3D library
+- **OBJLoader** - OBJ model loader
+- **MTLLoader** - Material loader
+- **OrbitControls** - Orbit controller
+- **PointerLockControls** - Pointer lock controller
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- npm, yarn, or pnpm
+
+### Installation
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### Development Server
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+```
+
+Visit `http://localhost:3000` in your browser.
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+## 📁 Project Structure
 
 ```
 My_Apartment_Web/
-├── index.html          # Main page
-├── css/
-│   └── style.css       # Stylesheet
-├── js/
-│   ├── main.js         # Main JavaScript logic
-│   └── keyboardControls.js  # Keyboard control module (for FPS movement)
-└── Apartments/         # 3D model folder
-    ├── berlin_pankow/  # Berlin Pankow apartment model
-    │   ├── textured_output.obj  # OBJ model file
-    │   ├── textured_output.mtl  # Material file
-    │   ├── textured_output.jpg  # Texture image
-    │   └── config.json  # Apartment configuration file
-    └── example_apartment/  # Example apartment model
-        └── config.json  # Apartment configuration file
+├── app/                    # Next.js app pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # App layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── apartment-gallery.tsx      # Apartment gallery component
+│   ├── apartment-3d-viewer.tsx    # 3D viewer component
+│   ├── header.tsx                 # Page header
+│   ├── hero-section.tsx           # Hero section
+│   └── ui/                        # Base UI components
+├── utils/                 # Utility functions
+│   └── apartment-data.ts  # Apartment data management
+├── public/               # Static assets
+│   └── apartments/       # Apartment 3D model files
+│       ├── berlin_pankow/
+│       │   ├── textured_output.obj
+│       │   ├── textured_output.mtl
+│       │   ├── textured_output.jpg
+│       │   └── config.json
+│       └── example_apartment/
+│           └── config.json
+└── package.json          # Project dependencies
 ```
 
-## Usage Instructions
+## 🎮 3D Viewer Usage
 
-### Starting the Project
-**Important Note:** The project must be run with a local HTTP server. Opening the HTML file directly will fail to load the 3D models correctly (due to browser CORS security policies).
+### Control Mode Switching
+- Click "Switch to FPS Mode" button to enter first-person mode
+- In FPS mode, click "Click to enable FPS controls" to lock mouse
+- Press ESC key to exit FPS mode
 
-```bash
-# Navigate to the project directory
-cd My_Apartment_Web
+### Mouse Orbit Mode
+- **Left Click & Drag**: Rotate view
+- **Right Click & Drag**: Pan view
+- **Mouse Wheel**: Zoom
 
-# Using Node.js serve tool (recommended)
-npx serve -p 8080
+### FPS Mode
+- **WASD Keys**: Forward, backward, left, right movement
+- **Mouse**: Control view direction
+- **ESC Key**: Exit FPS mode
 
-# Or using Python HTTP server
-python -m http.server
-python3 -m http.server
-```
+### Additional Features
+- **Preset Views**: Quick switch to top view, front view, side view
+- **Reset View**: Return to initial perspective
+- **Wireframe Mode**: View model wireframe structure
+- **Quality Control**: Adjust render quality for performance balance
+- **Screenshot**: Save current view as image
 
-Then access `http://localhost:8080` or `http://localhost:8000` in your browser.
+## 🏠 Adding New Apartment Models
 
-### Control Guide
+To add a new apartment model:
 
-#### Switching Control Modes
-- Click the "Switch to FPS mode" or "Switch to Mouse mode" button on the left side of the interface to toggle between the two modes
+1. **Prepare Model Files**:
+   ```
+   public/apartments/new_apartment_name/
+   ├── textured_output.obj  # 3D model file
+   ├── textured_output.mtl  # Material file
+   ├── textured_output.jpg  # Texture image
+   ├── shotcut.png          # Preview image (recommended)
+   └── config.json          # Configuration file
+   ```
 
-#### Mouse Orbit Mode (Default)
-- **Left mouse button drag**: Rotate view
-- **Right mouse button drag**: Pan view (in screen space, following current camera direction)
-- **Mouse wheel**: Zoom (in/out)
-
-#### FPS-style Mode
-1. Click the "Switch to FPS mode" button
-2. Click the "Click to enable FPS controls" button that appears to lock the mouse pointer
-3. Use the following controls:
-   - **WASD keys**: Control forward, backward, left, right movement
-   - **Mouse**: Control view direction
-   - **ESC key**: Exit FPS mode (prompt will appear in top-left)
-4. Movement is unrestricted by gravity or collisions, allowing free traversal of space
-
-### Basic Operations
-1. Select the apartment to view from the dropdown menu
-2. Wait for the model to load
-3. Choose your preferred control mode (mouse orbit or FPS)
-4. Use the control buttons in the interface:
-   - "Top view", "Front view", "Side view" buttons to quickly switch between preset views
-   - "Reset view" button to restore the view to its initial state
-   - "Toggle wireframe mode" to see the model's wireframe structure
-   - Adjust "Render quality" to balance performance and display quality
-   - Use "Save screenshot" button to save the current view as an image
-
-## Adding New Apartment Models
-
-To add a new apartment model, follow these steps:
-
-1. Create a new subfolder in the `Apartments` folder, using the apartment name as the folder name
-2. Place the OBJ model file, MTL material file, and texture images in this folder
-3. Create a `config.json` configuration file to set apartment parameters:
+2. **Create Configuration File** (`config.json`):
    ```json
    {
        "name": "Apartment Display Name",
@@ -111,42 +155,35 @@ To add a new apartment model, follow these steps:
        }
    }
    ```
-4. Add a new option in the `apartmentSelector` selector in the `index.html` file:
-   ```html
-   <select id="apartmentSelector">
-       <option value="berlin_pankow">Berlin Pankow Apartment</option>
-       <option value="new_apartment_folder_name">New Apartment Display Name</option>
-   </select>
-   ```
 
-## Technical Details
+3. **Update Data File** (`utils/apartment-data.ts`):
+   - Add new apartment data object to `apartments` array
+   - If apartment has `shotcut.png`, add apartment ID to `APARTMENTS_WITH_SHOTCUT` array
 
-### Dual Mode Control System
-The application uses two complementary control systems:
-- **Orbit Controls Mode**: Based on Three.js OrbitControls, suitable for traditional 3D browsing
-  - Smart adjustment of rotation center, ensuring orbit controls always revolve around scene center
-  - Screen space panning, keeping pan direction consistent with current view
-- **FPS Controls Mode**:
-  - PointerLockControls handles mouse locking and view rotation
-  - Custom KeyboardControls module handles WASD key movement
-  - Smooth transition between modes, maintaining view continuity
+### Preview Image Priority
+The system selects preview images in the following priority:
+1. **shotcut.png** - Dedicated preview image (if exists)
+2. **textured_output.jpg** - 3D model texture as fallback
+3. **placeholder.svg** - Default placeholder
 
-### Configuration File System
-Each apartment model can be customized via a `config.json` file:
-- Custom name
-- Camera height specification (eye level)
-- Initial view position setting
-
-### Local Development Notes
-Due to browser security restrictions (CORS policies), a local HTTP server must be used to load 3D models during development. Opening the HTML file directly will result in model loading failure.
-
-## Browser Compatibility
+## 🌐 Browser Compatibility
 
 - Chrome 90+
 - Firefox 90+
 - Safari 14+
 - Edge 90+
 
-## License
+## 🤝 Contributing
 
-MIT 
+Contributions are welcome! Please feel free to submit Issues and Pull Requests.
+
+### Development Workflow
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

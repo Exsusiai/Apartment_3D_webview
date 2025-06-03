@@ -1,107 +1,151 @@
-# 我的公寓3D模型展示
+# 3D公寓展示平台
 
-[English Version](README.md)
+[中文版本](README_CN.md) | [English](README.md)
 
-这是一个简单的静态网页应用，用于展示公寓的3D扫描模型。用户可以轻松查看公寓的空间布局和细节，并可以在两种控制模式间切换：传统的鼠标轨道控制模式和FPS风格控制模式。这种设计满足了不同用户的浏览偏好，提供身临其境的体验。
+一个现代化的3D公寓展示平台，结合了优雅的画廊界面和强大的3D查看器功能。该项目成功地将公寓画廊和3D查看器功能合并为一个统一的平台。
 
-## 功能特点
+⚠️注意： 这是一个完全由AI生成的项目，完全由自然语言驱动prompt的Cursor + claude 4 完成项目代码，因此代码以及项目架构不具备参考性。开发本项目所使用的Cursor Rule请参考[Cursor_Rule](cursor_rule.md)
 
-- 加载和显示OBJ格式的3D公寓模型
-- 双控制模式系统：
-  - **鼠标轨道模式**：传统旋转/平移/缩放控制
-  - **FPS风格模式**：WASD键移动，鼠标控制视角
-- 模式间无缝切换，保持视角连续性
-- 直观的界面提示（ESC退出FPS模式）
-- 自由穿越空间，无碰撞限制
-- 预设视角快速切换（顶视图、侧视图等）
-- 线框模式支持，查看模型结构
-- 简洁清晰的用户界面
-- 响应式设计，适配不同设备
-- 多公寓模型切换（可扩展）
+## ✨ 功能特色
 
-## 技术栈
+### 画廊界面
+- **现代化设计**：使用Next.js + Tailwind CSS构建的响应式布局
+- **优雅布局**：交替排列的公寓卡片，配有流畅的滚动动画
+- **真实数据集成**：使用Apartments文件夹中的实际公寓数据
+- **智能预览系统**：优先使用公寓文件夹中的`shotcut.png`作为预览图
+- **智能交互**：区分有3D模型和无3D模型的公寓
 
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- Three.js（WebGL 3D库）
+### 3D查看器功能
+- **双控制模式**：
+  - **鼠标轨道模式**：传统的旋转/平移/缩放控制
+  - **FPS模式**：WASD移动 + 鼠标视角控制
+- **完整3D体验**：
+  - 加载OBJ格式的3D公寓模型
+  - 材质和纹理支持
+  - 多种预设视角（顶视图、正视图、侧视图）
+  - 线框模式切换
+  - 渲染质量调节
+  - 截图功能
+- **无缝集成**：在对话框中嵌入完整的3D查看器，保留所有原始功能
 
-## 项目结构
+## 🛠 技术栈
+
+### 前端框架
+- **Next.js 15** - React全栈框架
+- **React 19** - 用户界面库
+- **TypeScript** - 类型安全的JavaScript
+
+### 样式和UI
+- **Tailwind CSS** - 实用优先的CSS框架
+- **Radix UI** - 无障碍的UI组件库
+- **Lucide React** - 图标库
+
+### 3D渲染
+- **Three.js** - WebGL 3D库
+- **OBJLoader** - OBJ模型加载器
+- **MTLLoader** - 材质加载器
+- **OrbitControls** - 轨道控制器
+- **PointerLockControls** - 指针锁定控制器
+
+## 🚀 快速开始
+
+### 环境要求
+- Node.js 18+
+- npm、yarn 或 pnpm
+
+### 安装依赖
+```bash
+npm install
+# 或
+yarn install
+# 或
+pnpm install
+```
+
+### 启动开发服务器
+```bash
+npm run dev
+# 或
+yarn dev
+# 或
+pnpm dev
+```
+
+在浏览器中访问 `http://localhost:3000`。
+
+### 生产构建
+```bash
+npm run build
+npm start
+```
+
+## 📁 项目结构
 
 ```
 My_Apartment_Web/
-├── index.html          # 主页面
-├── css/
-│   └── style.css       # 样式文件
-├── js/
-│   ├── main.js         # 主JavaScript逻辑
-│   └── keyboardControls.js  # 键盘控制模块（FPS移动）
-└── Apartments/         # 3D模型文件夹
-    ├── berlin_pankow/  # 柏林潘科区公寓模型
-    │   ├── textured_output.obj  # OBJ模型文件
-    │   ├── textured_output.mtl  # 材质文件
-    │   ├── textured_output.jpg  # 纹理图片
-    │   └── config.json  # 公寓配置文件
-    └── example_apartment/  # 示例公寓模型
-        └── config.json  # 公寓配置文件
+├── app/                    # Next.js应用页面
+│   ├── globals.css        # 全局样式
+│   ├── layout.tsx         # 应用布局
+│   └── page.tsx           # 主页
+├── components/            # React组件
+│   ├── apartment-gallery.tsx      # 公寓画廊组件
+│   ├── apartment-3d-viewer.tsx    # 3D查看器组件
+│   ├── header.tsx                 # 页面头部
+│   ├── hero-section.tsx           # 英雄区域
+│   └── ui/                        # 基础UI组件
+├── utils/                 # 工具函数
+│   └── apartment-data.ts  # 公寓数据管理
+├── public/               # 静态资源
+│   └── apartments/       # 公寓3D模型文件
+│       ├── berlin_pankow/
+│       │   ├── textured_output.obj
+│       │   ├── textured_output.mtl
+│       │   ├── textured_output.jpg
+│       │   └── config.json
+│       └── example_apartment/
+│           └── config.json
+└── package.json          # 项目依赖
 ```
 
-## 使用方法
+## 🎮 3D查看器使用指南
 
-### 启动项目
-**重要提示：** 必须使用本地HTTP服务器运行项目，直接打开HTML文件将无法正确加载3D模型（受浏览器CORS安全策略限制）。
+### 控制模式切换
+- 点击"切换到FPS模式"按钮进入第一人称模式
+- 在FPS模式下，点击"点击以启用FPS控制"来锁定鼠标
+- 按ESC键退出FPS模式
 
-```bash
-# 导航到项目目录
-cd My_Apartment_Web
+### 鼠标轨道模式
+- **左键点击拖拽**：旋转视角
+- **右键点击拖拽**：平移视图
+- **鼠标滚轮**：缩放
 
-# 使用Node.js的serve工具（推荐方式）
-npx serve -p 8080
+### FPS模式
+- **WASD键**：前进、后退、左移、右移
+- **鼠标**：控制视角方向
+- **ESC键**：退出FPS模式
 
-# 或使用Python HTTP服务器
-python -m http.server
-python3 -m http.server
-```
+### 附加功能
+- **预设视角**：快速切换到顶视图、正视图、侧视图
+- **重置视图**：返回到初始视角
+- **线框模式**：查看模型线框结构
+- **质量控制**：调节渲染质量以平衡性能
+- **截图功能**：保存当前视图为图片
 
-然后在浏览器中访问 `http://localhost:8080` 或 `http://localhost:8000`
+## 🏠 添加新公寓模型
 
-### 控制指南
+要添加新的公寓模型：
 
-#### 切换控制模式
-- 点击界面左侧的"切换到FPS模式"或"切换到鼠标模式"按钮在两种模式间切换
+1. **准备模型文件**：
+   ```
+   public/apartments/新公寓名称/
+   ├── textured_output.obj  # 3D模型文件
+   ├── textured_output.mtl  # 材质文件
+   ├── textured_output.jpg  # 纹理图片
+   ├── shotcut.png          # 预览图片（推荐）
+   └── config.json          # 配置文件
+   ```
 
-#### 鼠标轨道模式（默认）
-- **鼠标左键拖动**：旋转视角
-- **鼠标右键拖动**：平移视角（基于屏幕空间，跟随当前相机方向）
-- **鼠标滚轮**：缩放（靠近/远离）
-
-#### FPS风格模式
-1. 点击"切换到FPS模式"按钮
-2. 点击出现的"点击以启用FPS控制"按钮锁定鼠标指针
-3. 使用以下控制：
-   - **WASD 键**：控制前后左右移动
-   - **鼠标**：控制视角方向
-   - **ESC键**：退出FPS模式（屏幕左上角会有提示）
-4. 移动不受重力或碰撞限制，可以自由穿越空间
-
-### 基本操作
-1. 从下拉菜单中选择要查看的公寓
-2. 等待模型加载完成
-3. 选择偏好的控制模式（鼠标轨道或FPS）
-4. 使用界面中的控制按钮：
-   - "顶视图"、"正视图"、"侧视图"按钮快速切换预设视角
-   - "重置视图"按钮可以将视角恢复到初始状态
-   - "切换线框模式"可以查看模型的线框结构
-   - 调整"渲染质量"以平衡性能和显示效果
-   - 使用"保存截图"按钮保存当前视图为图片
-
-## 添加新的公寓模型
-
-要添加新的公寓模型，请按照以下步骤操作：
-
-1. 在`Apartments`文件夹中创建新的子文件夹，使用公寓名称作为文件夹名
-2. 将OBJ模型文件、MTL材质文件和纹理图片放入该文件夹
-3. 创建`config.json`配置文件设置公寓参数：
+2. **创建配置文件** (`config.json`)：
    ```json
    {
        "name": "公寓显示名称",
@@ -111,42 +155,35 @@ python3 -m http.server
        }
    }
    ```
-4. 在`index.html`文件中的`apartmentSelector`选择器中添加新的选项：
-   ```html
-   <select id="apartmentSelector">
-       <option value="berlin_pankow">柏林潘科区公寓</option>
-       <option value="新公寓文件夹名称">新公寓显示名称</option>
-   </select>
-   ```
 
-## 技术说明
+3. **更新数据文件** (`utils/apartment-data.ts`)：
+   - 在`apartments`数组中添加新的公寓数据对象
+   - 如果公寓有`shotcut.png`，将公寓ID添加到`APARTMENTS_WITH_SHOTCUT`数组中
 
-### 双模式控制系统
-应用使用两种互补的控制系统：
-- **轨道控制模式**：基于Three.js的OrbitControls，适合传统3D浏览
-  - 旋转中心智能调整，确保轨道控制始终围绕场景中心
-  - 屏幕空间平移，使平移方向与当前视角保持一致
-- **FPS控制模式**：
-  - PointerLockControls处理鼠标锁定和视角旋转
-  - 自定义KeyboardControls模块处理WASD键移动
-  - 模式间平滑过渡，保持视角连续性
+### 预览图片优先级
+系统按以下优先级选择预览图片：
+1. **shotcut.png** - 专门的预览图片（如果存在）
+2. **textured_output.jpg** - 3D模型纹理作为备选
+3. **placeholder.svg** - 默认占位符
 
-### 配置文件系统
-每个公寓模型可以通过`config.json`文件进行自定义配置：
-- 自定义名称
-- 指定相机高度（人眼高度）
-- 设置初始视角位置
-
-### 本地开发注意事项
-由于浏览器的安全限制（CORS策略），在开发过程中必须使用本地HTTP服务器加载3D模型。直接打开HTML文件会导致模型加载失败。
-
-## 浏览器兼容性
+## 🌐 浏览器兼容性
 
 - Chrome 90+
 - Firefox 90+
 - Safari 14+
 - Edge 90+
 
-## 许可证
+## 🤝 参与贡献
 
-MIT 
+欢迎贡献！请随时提交Issue和Pull Request。
+
+### 开发流程
+1. Fork本项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建Pull Request
+
+## 📄 许可证
+
+本项目基于MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详细信息。
