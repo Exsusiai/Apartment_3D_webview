@@ -50,10 +50,6 @@ export function Header() {
       document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
     }
 
-    // 确保页面可滚动
-    document.body.style.overflow = "auto"
-    document.documentElement.style.overflow = "auto"
-
     // 延迟后强制刷新页面状态
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'))

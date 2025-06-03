@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrollbar Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            height: 2000px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            padding: 20px;
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h1>Scrollbar Test Page</h1>
+        <p>If you see only ONE vertical scrollbar on the right side of this page, the fix is working correctly.</p>
+        <p>This page is intentionally tall to test scrolling behavior.</p>
+        <p>Navigate to <a href="http://localhost:3000">the main app</a> to verify the fix.</p>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test Content Area</h2>
+        <p>This is a very tall content area to trigger scrolling.</p>
+        <p>The page should only have one scrollbar - the browser's default body scrollbar.</p>
+        <p>There should be no nested scrollable containers causing double scrollbars.</p>
+    </div>
+    
+    <script>
+        console.log('Scrollbar Test Page Loaded');
+        console.log('Body overflow:', getComputedStyle(document.body).overflow);
+        console.log('HTML overflow:', getComputedStyle(document.documentElement).overflow);
+    </script>
+</body>
+</html> 

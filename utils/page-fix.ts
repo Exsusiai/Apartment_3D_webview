@@ -9,8 +9,13 @@ export class PageFixer {
 
   // 确保页面可滚动
   static ensureScrollability(): void {
-    document.body.style.overflow = "auto"
-    document.documentElement.style.overflow = "auto"
+    // 确保没有意外的overflow hidden设置
+    if (document.body.style.overflow === "hidden") {
+      document.body.style.overflow = ""
+    }
+    if (document.documentElement.style.overflow === "hidden") {
+      document.documentElement.style.overflow = ""
+    }
     
     // 移除可能的固定定位问题
     document.body.style.position = ""

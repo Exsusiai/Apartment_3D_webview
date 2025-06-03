@@ -126,10 +126,6 @@ export function HeroSection() {
       top: scrollPosition,
       behavior: "smooth",
     })
-
-    // 确保页面可滚动
-    document.body.style.overflow = "auto"
-    document.documentElement.style.overflow = "auto"
   }
 
   return (

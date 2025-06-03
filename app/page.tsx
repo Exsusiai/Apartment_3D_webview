@@ -107,7 +107,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white overflow-auto relative">
+    <main className="min-h-screen bg-white relative">
       <Header />
       <div className="flex flex-col border-none">
         <HeroSection />

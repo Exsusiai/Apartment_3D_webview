@@ -43,10 +43,6 @@ export function ScrollToTopButton() {
       document.body.scrollTop = 0 // For Safari
       document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
     }
-
-    // 确保页面可滚动
-    document.body.style.overflow = "auto"
-    document.documentElement.style.overflow = "auto"
   }
 
   return (
