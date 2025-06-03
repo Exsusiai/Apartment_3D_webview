@@ -1,4 +1,4 @@
-# 3D公寓展示平台
+# About MemoSpace
 
 [中文版本](README_CN.md) | [English](README.md)
 

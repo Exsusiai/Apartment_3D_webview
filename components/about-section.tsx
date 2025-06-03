@@ -163,7 +163,7 @@ export function AboutSection() {
 
             {/* 开发工具卡片 */}
             <a 
-              href="https://www.notion.so/jingshengcheng/Cursor-Rule-Frontend-Dev-2074d644686980c58c31cdce6ba773f4?source=copy_link"
+              href="https://github.com/Exsusiai/Apartment_3D_webview/blob/main/cursor_rule.md"
               target="_blank" 
               rel="noopener noreferrer"
               className="block p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300 group"
@@ -171,7 +171,7 @@ export function AboutSection() {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
                   <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div>
@@ -179,7 +179,7 @@ export function AboutSection() {
                     Development by Cursor + Claude 4
                   </h4>
                   <p className="text-gray-600 text-sm">
-                    Click to view Cursor Rules used in this project
+                    View Cursor Rules used in this project on GitHub
                   </p>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-# 3D Apartment Showcase Platform
+# MemoSpace
 
 [中文版本](README_CN.md) | [English](README.md)
 
