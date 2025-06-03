@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { SessionState } from "@/utils/state-utils"
+import { AnimatedBackground } from "@/components/animated-background"
 
 export function HeroSection() {
   // 添加动画状态
@@ -140,38 +141,11 @@ export function HeroSection() {
           : "min-h-[calc(100vh-80px)] flex flex-col items-center justify-center" // 首次访问，使用全屏高度减去导航栏
       }`}
     >
-      {/* 背景曲线装饰 - 添加淡入动画 */}
-      <div
-        className={`absolute inset-0 z-0 overflow-hidden transition-opacity duration-1000 ease-in-out ${
-          isLoaded ? "opacity-10" : "opacity-0"
-        }`}
-      >
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1200 500"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0,100 C300,300 400,0 500,100 C600,200 700,0 900,100 C1100,200 1000,300 1200,250"
-            fill="none"
-            stroke="black"
-            strokeWidth="1"
-          />
-          <path
-            d="M0,200 C200,100 300,200 400,100 C500,0 700,300 800,200 C900,100 1000,200 1200,100"
-            fill="none"
-            stroke="black"
-            strokeWidth="1"
-          />
-          <path
-            d="M0,150 C200,250 400,150 600,250 C800,350 1000,150 1200,200"
-            fill="none"
-            stroke="black"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
+      {/* 新的动画背景 - 只在第一次访问时显示完整动画 */}
+      <AnimatedBackground 
+        isActive={isLoaded} 
+        opacity={hasViewedContent ? 0.12 : 0.18} 
+      />
 
       <div
         className={`container mx-auto px-4 relative z-10 text-center ${hasViewedContent ? "" : "flex-grow flex flex-col justify-center"}`}
