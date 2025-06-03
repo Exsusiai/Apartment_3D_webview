@@ -56,7 +56,7 @@ export function ScrollToTopButton() {
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none",
       )}
       onClick={scrollToTop}
-      aria-label="返回顶部"
+      aria-label="Back to top"
     >
       <ArrowUp className="h-5 w-5" />
     </Button>

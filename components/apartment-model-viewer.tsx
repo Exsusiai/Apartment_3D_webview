@@ -29,9 +29,10 @@ export function ApartmentModelViewer({ modelUrl, title }: ApartmentModelViewerPr
 
   return (
     <div className="w-full h-full" ref={containerRef}>
-      {/* 在实际3D查看器加载前显示的占位内容 */}
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">正在加载 {title} 的3D模型...</p>
+      <div className="flex flex-col items-center justify-center h-full bg-gray-50">
+        {/* 在实际3D查看器加载前显示的占位内容 */}
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500">Loading {title}'s 3D model...</p>
       </div>
     </div>
   )

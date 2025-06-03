@@ -16,7 +16,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
 
   useEffect(() => {
     if (!apartment.hasModel) {
-      setError("该公寓暂无3D模型")
+      setError("This apartment currently has no 3D model")
       setIsLoading(false)
       return
     }
@@ -35,7 +35,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${apartment.title} - 3D查看器</title>
+    <title>${apartment.title} - 3D Viewer</title>
     <style>
         body {
             margin: 0;
@@ -245,64 +245,64 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
     <div class="viewer-container">
         <div class="sidebar">
             <div class="panel">
-                <h3>🏠 公寓信息</h3>
+                <h3>🏠 Apartment Information</h3>
                 <h4 style="margin: 0; color: #333;">${apartment.title}</h4>
                 <p style="font-size: 12px; color: #666; margin: 8px 0 0 0;">${apartment.description}</p>
             </div>
 
             <div class="panel">
-                <h3>🎮 视角控制</h3>
+                <h3>🎮 View Control</h3>
                 <div class="controls-group">
                     <button id="toggleControlModeBtn" class="btn full-width">
-                        <span id="controlModeText">切换到FPS模式</span>
+                        <span id="controlModeText">Switch to FPS Mode</span>
                     </button>
                 </div>
                 <div class="controls-group">
-                    <button id="viewTopBtn" class="btn secondary">顶视图</button>
-                    <button id="viewFrontBtn" class="btn secondary">正视图</button>
-                    <button id="viewSideBtn" class="btn secondary">侧视图</button>
+                    <button id="viewTopBtn" class="btn secondary">Top View</button>
+                    <button id="viewFrontBtn" class="btn secondary">Front View</button>
+                    <button id="viewSideBtn" class="btn secondary">Side View</button>
                 </div>
                 <div class="controls-group">
-                    <button id="resetViewBtn" class="btn full-width">重置视图</button>
+                    <button id="resetViewBtn" class="btn full-width">Reset View</button>
                 </div>
                 <div class="controls-group">
-                    <button id="toggleWireframeBtn" class="btn secondary full-width">切换线框模式</button>
+                    <button id="toggleWireframeBtn" class="btn secondary full-width">Toggle Wireframe</button>
                 </div>
             </div>
 
             <div class="panel">
-                <h3>⚙️ 质量控制</h3>
-                <label for="qualitySelector">渲染质量:</label>
+                <h3>⚙️ Quality Control</h3>
+                <label for="qualitySelector">Render Quality:</label>
                 <select id="qualitySelector">
-                    <option value="low">低 (更流畅)</option>
-                    <option value="medium" selected>中 (平衡)</option>
-                    <option value="high">高 (更清晰)</option>
+                    <option value="low">Low (Smoother)</option>
+                    <option value="medium" selected>Medium (Balanced)</option>
+                    <option value="high">High (Clearer)</option>
                 </select>
             </div>
 
             <div class="panel">
-                <h3>📷 截图</h3>
-                <button id="screenshotBtn" class="btn full-width">保存截图</button>
+                <h3>📷 Screenshot</h3>
+                <button id="screenshotBtn" class="btn full-width">Save Screenshot</button>
             </div>
         </div>
 
         <div class="model-view">
-            <button class="close-btn" onclick="window.parent.postMessage('close', '*')" title="关闭">×</button>
+            <button class="close-btn" onclick="window.parent.postMessage('close', '*')" title="Close">×</button>
             <div id="modelContainer">
                 <div class="view-info">
-                    <div id="rotationInfo">视角: 0°</div>
-                    <div id="zoomInfo">高度: ${apartment.config.camera.height}m</div>
+                    <div id="rotationInfo">View: 0°</div>
+                    <div id="zoomInfo">Height: ${apartment.config.camera.height}m</div>
                 </div>
                 <div id="escExitPrompt" class="esc-prompt hidden">
-                    按ESC退出FPS模式
+                    Press ESC to exit FPS mode
                 </div>
                 <div id="loadingOverlay">
                     <div class="spinner"></div>
-                    <div class="loading-text">正在加载模型...</div>
+                    <div class="loading-text">Loading model...</div>
                 </div>
                 <div id="pointerLockPrompt" class="center-screen hidden">
                     <div class="prompt-content">
-                        <button id="enterFPSBtn" class="btn full-width" style="font-size:1.1rem;padding:1em 2em;">点击以启用FPS控制</button>
+                        <button id="enterFPSBtn" class="btn full-width" style="font-size:1.1rem;padding:1em 2em;">Click to enable FPS control</button>
                     </div>
                 </div>
             </div>
@@ -375,7 +375,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 this.enabled = true;
                 document.addEventListener('keydown', this._onKeyDown, false);
                 document.addEventListener('keyup', this._onKeyUp, false);
-                console.log('键盘控制已启用');
+                console.log('Keyboard control enabled');
             }
             
             disable() {
@@ -390,7 +390,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                     this.keys[key] = false;
                 }
                 this.isMoving = false;
-                console.log('键盘控制已禁用');
+                console.log('Keyboard control disabled');
             }
             
             _onKeyDown(event) {
@@ -580,7 +580,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 console.error('初始化3D场景失败:', error);
                 const loadingOverlay = document.getElementById('loadingOverlay');
                 if (loadingOverlay) {
-                    loadingOverlay.innerHTML = '<div style="color: red;">3D场景初始化失败</div>';
+                    loadingOverlay.innerHTML = '<div style="color: red;">3D scene initialization failed</div>';
                 }
             }
         }

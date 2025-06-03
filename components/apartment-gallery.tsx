@@ -78,12 +78,12 @@ function ApartmentCard({
                 )} />
                 {apartment.hasModel && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20">
-                    <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">查看3D模型</span>
+                    <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">View 3D Model</span>
                   </div>
                 )}
                 {isPlaceholder && (
                   <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">即将推出</span>
+                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">Coming Soon</span>
                   </div>
                 )}
                 <div className={cn(
@@ -113,7 +113,7 @@ function ApartmentCard({
                     onClick={handleCardClick}
                     className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors self-end"
                   >
-                    查看3D模型
+                    View 3D Model
                   </button>
                 )}
               </div>
@@ -141,7 +141,7 @@ function ApartmentCard({
                     onClick={handleCardClick}
                     className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors self-start"
                   >
-                    查看3D模型
+                    View 3D Model
                   </button>
                 )}
               </div>
@@ -161,12 +161,12 @@ function ApartmentCard({
                 )} />
                 {apartment.hasModel && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20">
-                    <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">查看3D模型</span>
+                    <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">View 3D Model</span>
                   </div>
                 )}
                 {isPlaceholder && (
                   <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">即将推出</span>
+                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">Coming Soon</span>
                   </div>
                 )}
                 <div className={cn(
@@ -189,7 +189,7 @@ function ApartmentCard({
       {showNoModelMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-blue-100 border border-blue-300 px-6 py-3 rounded-lg shadow-lg">
           <p className="text-blue-800 text-sm font-medium">
-            {apartment.title}的3D模型正在准备中，敬请期待！
+            The 3D model for {apartment.title} is being prepared, stay tuned!
           </p>
         </div>
       )}
@@ -198,7 +198,7 @@ function ApartmentCard({
       <Dialog open={!!selectedApartment} onOpenChange={(open) => !open && setSelectedApartment(null)}>
         <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0">
           <DialogTitle className="sr-only">
-            {selectedApartment?.title} - 3D查看器
+            {selectedApartment?.title} - 3D Viewer
           </DialogTitle>
           {selectedApartment && (
             <Apartment3DViewer 
@@ -219,22 +219,19 @@ export function ApartmentGallery() {
   // 获取真实的公寓数据
   const apartments = getApartments()
 
-  // 计算中轴线的高度，确保它覆盖所有卡片
+  // 计算中轴线的高度，确保它只覆盖gallery区域，不延伸到About部分
   useEffect(() => {
-    // 初始设置一个较大的值，确保在计算前中轴线可见
-    setAxisHeight("200vh")
-
-    // 使用ResizeObserver监听内容高度变化
     const updateAxisHeight = () => {
       if (galleryRef.current) {
-        // 添加足够的额外高度确保中轴线延伸到最后一个卡片之后
-        const height = galleryRef.current.scrollHeight + 200
-        setAxisHeight(`${height}px`)
+        // 获取gallery容器内容的实际高度
+        const contentHeight = galleryRef.current.clientHeight
+        // 只给中轴线设置到gallery内容结束的位置，不添加额外高度
+        setAxisHeight(`${contentHeight}px`)
       }
     }
 
     // 初始更新
-    updateAxisHeight()
+    setTimeout(updateAxisHeight, 100) // 短暂延迟确保DOM渲染完成
 
     // 设置ResizeObserver
     const resizeObserver = new ResizeObserver(updateAxisHeight)
@@ -263,7 +260,7 @@ export function ApartmentGallery() {
       {/* 添加一个锚点元素，用于更精确的滚动定位 */}
       <div id="gallery-anchor" className="absolute" style={{ top: "-100px" }}></div>
 
-      {/* 中轴线 - 从hero section底部开始 */}
+      {/* 中轴线 - 只覆盖gallery区域，不延伸到About部分 */}
       <div
         className="absolute left-1/2 top-0 w-[2px] md:w-[3px] bg-gray-200 md:bg-gray-300 transform -translate-x-1/2 z-10"
         style={{ height: axisHeight }}

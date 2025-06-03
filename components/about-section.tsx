@@ -23,10 +23,10 @@ export function AboutSection() {
         {/* 标题部分 */}
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            关于 MemoSpace
+            About MemoSpace
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            一个用3D技术保存空间记忆的数字化项目
+            A digital project that preserves spatial memories through immersive visualization
           </p>
         </div>
 
@@ -35,13 +35,34 @@ export function AboutSection() {
           {/* 项目介绍 */}
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-              项目愿景
+              Project Vision
             </h3>
-            <p className="text-gray-700 leading-relaxed text-lg max-w-3xl mx-auto">
-              MemoSpace 是一个致力于保存和分享居住空间记忆的3D数字化项目。我们相信每一个居住过的地方都承载着独特的故事和情感，
-              值得被完整地记录下来。通过高精度的3D扫描技术，我们将这些珍贵的空间记忆永久保存，
-              让人们能够随时重新体验那些曾经生活过的地方。
-            </p>
+            <div className="text-gray-700 leading-relaxed text-lg max-w-3xl mx-auto space-y-4 text-left">
+              <p>
+                MemoSpace is a digital remembrance project that documents the 3D-scanned models of apartments I have lived in over the years.
+              </p>
+              <p>
+                Since I began studying abroad in 2020, I've called several places home: two student apartments in Helsinki, two more in Stockholm, and—after moving to Berlin for work—four different apartments through three relocations.
+              </p>
+              <p>
+                Back then, mobile 3D scanning tools already existed, but I never realized their potential as a way to preserve and revisit the spaces that shaped my everyday life. I regret not having started sooner. That's why I've decided to begin now—to document the rooms I've lived in, while I still can.
+              </p>
+              <p>
+                This project is my way of archiving not just spaces, but memories—captured in three dimensions.
+              </p>
+              <p>
+                This project is also my first exploration into AI-assisted programming. It's the first time I built a front-end website without writing a single line of code myself—everything was created using natural language prompts.
+              </p>
+              <p>
+                As a C++ engineer, I don't have much experience with web development. But with the help of large language models, I was still able to design and build this site in a very short time.
+              </p>
+              <p>
+                AI programming has now reached a point where it can support the development of complete projects—though it still benefits greatly from guidance by someone with programming knowledge.
+              </p>
+              <p>
+                I find this very exciting, and I believe the day when AI agents can independently develop full applications is not far away.
+              </p>
+            </div>
           </div>
 
           {/* 特色功能 */}
@@ -49,13 +70,12 @@ export function AboutSection() {
             <div className="text-center p-6 bg-white rounded-lg shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">高精度3D扫描</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Online 3D Viewer</h4>
               <p className="text-gray-600 text-sm">
-                使用先进的3D扫描技术，捕捉空间的每一个细节，
-                创造身临其境的浏览体验
+                Intuitive navigation interface, model rendering quality control, and screenshot capture functionality
               </p>
             </div>
 
@@ -65,10 +85,9 @@ export function AboutSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">沉浸式体验</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Immersive Experience</h4>
               <p className="text-gray-600 text-sm">
-                流畅的360度视角控制和真实的光影效果，
-                让您仿佛真的重新走进了那个空间
+                Smooth 360-degree view control and multiple camera modes with FPS support, making you feel like truly walking back into that space
               </p>
             </div>
 
@@ -78,10 +97,9 @@ export function AboutSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">情感记忆</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Emotional Memory</h4>
               <p className="text-gray-600 text-sm">
-                不仅仅是空间的记录，更是情感和回忆的载体，
-                每个角落都诉说着独特的故事
+                More than just spatial documentation, it's a carrier of emotions and memories, where every corner tells a unique story
               </p>
             </div>
           </div>
@@ -89,75 +107,83 @@ export function AboutSection() {
           {/* 技术说明 */}
           <div className="bg-white p-8 rounded-lg shadow-sm">
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-              技术实现
+              Technology Stack
             </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-3">前端技术</h4>
-                <ul className="space-y-2 text-gray-700">
+            <div className="max-w-2xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-4">
+                <ul className="space-y-3 text-gray-700">
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
-                    Next.js + React 19 现代化框架
+                    Next.js + React 19 modern framework
                   </li>
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
-                    Three.js 3D渲染引擎
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
-                    TypeScript 类型安全开发
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
-                    Tailwind CSS 现代化样式
+                    Three.js 3D rendering engine
                   </li>
                 </ul>
-              </div>
-              <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-3">3D技术特性</h4>
-                <ul className="space-y-2 text-gray-700">
+                <ul className="space-y-3 text-gray-700">
                   <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-3"></span>
-                    实时光线追踪渲染
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
+                    TypeScript type-safe development
                   </li>
                   <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-3"></span>
-                    多种相机控制模式
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-3"></span>
-                    响应式性能优化
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-3"></span>
-                    跨平台兼容性支持
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
+                    Tailwind CSS modern styling
                   </li>
                 </ul>
               </div>
             </div>
           </div>
 
-          {/* 当前状态和未来计划 */}
-          <div className="text-center">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-              项目进展
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 p-6 rounded-lg">
-                <h4 className="text-lg font-medium text-blue-900 mb-3">当前展示</h4>
-                <p className="text-blue-800 text-sm">
-                  目前展示了柏林潘科区（Berlin Pankow）的公寓3D模型，
-                  这是一个完整的高精度扫描案例，展示了项目的技术实现水平和视觉效果。
-                </p>
+          {/* 底部卡片 */}
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+            {/* 个人网站卡片 */}
+            <a 
+              href="https://jingsheng.dev" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                    My Personal Website
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Visit my personal site to learn more about me
+                  </p>
+                </div>
               </div>
-              <div className="bg-green-50 p-6 rounded-lg">
-                <h4 className="text-lg font-medium text-green-900 mb-3">未来规划</h4>
-                <p className="text-green-800 text-sm">
-                  计划添加更多居住空间的3D模型，包括不同城市、不同时期的居住记忆，
-                  构建一个完整的个人空间记忆档案。
-                </p>
+            </a>
+
+            {/* 开发工具卡片 */}
+            <a 
+              href="https://www.notion.so/jingshengcheng/Cursor-Rule-Frontend-Dev-2074d644686980c58c31cdce6ba773f4?source=copy_link"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                    Development by Cursor + Claude 4
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    Click to view Cursor Rules used in this project
+                  </p>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>

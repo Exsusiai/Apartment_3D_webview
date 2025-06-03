@@ -58,8 +58,8 @@ export const apartments: ApartmentData[] = [
   // Berlin Pankow 公寓
   {
     id: 'berlin_pankow',
-    title: 'Berlin Pankow公寓',
-    description: '位于柏林潘科区的真实3D扫描公寓模型。采用高精度扫描技术，完整还原实际空间布局和细节，提供沉浸式的空间浏览体验。',
+    title: 'Berlin Pankow Apartment',
+    description: 'A real 3D scanned apartment model located in Berlin Pankow district. Using high-precision scanning technology to completely restore the actual spatial layout and details, providing an immersive spatial browsing experience.',
     thumbnail: getThumbnailPath('berlin_pankow'),
     modelPath: '/apartments/berlin_pankow',
     config: {
@@ -74,12 +74,12 @@ export const apartments: ApartmentData[] = [
   // 示例公寓
   {
     id: 'example_apartment',
-    title: '示例公寓（演示用）',
-    description: '这是一个演示用的示例公寓模型，用于展示3D查看器的基本功能和交互方式。适合用来体验不同的控制模式和视角切换。',
+    title: 'Example Apartment (Demo)',
+    description: 'This is a demonstration example apartment model used to showcase the basic functions and interaction methods of the 3D viewer. Suitable for experiencing different control modes and perspective switching.',
     thumbnail: getThumbnailPath('example_apartment'),
     modelPath: '/apartments/example_apartment',
     config: {
-      name: '示例公寓（演示用）',
+      name: 'Example Apartment (Demo)',
       camera: {
         height: 1.8,
         init_point: [5, 15]
@@ -90,12 +90,12 @@ export const apartments: ApartmentData[] = [
   // 空位1
   {
     id: 'placeholder_1',
-    title: '更多公寓即将推出',
-    description: '我们正在扫描和处理更多的公寓模型，敬请期待。如果您有兴趣展示您的公寓，请联系我们。',
+    title: 'More Apartments Coming Soon',
+    description: 'We are scanning and processing more apartment models, stay tuned. If you are interested in showcasing your apartment, please contact us.',
     thumbnail: getThumbnailPath('placeholder_1'),
     modelPath: '',
     config: {
-      name: '待添加',
+      name: 'To be added',
       camera: { height: 1.7, init_point: [0, 0] }
     },
     hasModel: false
@@ -103,12 +103,12 @@ export const apartments: ApartmentData[] = [
   // 空位2
   {
     id: 'placeholder_2',
-    title: '更多公寓即将推出',
-    description: '我们正在扫描和处理更多的公寓模型，敬请期待。如果您有兴趣展示您的公寓，请联系我们。',
+    title: 'More Apartments Coming Soon',
+    description: 'We are scanning and processing more apartment models, stay tuned. If you are interested in showcasing your apartment, please contact us.',
     thumbnail: getThumbnailPath('placeholder_2'),
     modelPath: '',
     config: {
-      name: '待添加',
+      name: 'To be added',
       camera: { height: 1.7, init_point: [0, 0] }
     },
     hasModel: false

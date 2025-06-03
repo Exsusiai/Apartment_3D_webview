@@ -1,24 +1,24 @@
 /**
- * utils.js - 通用工具函数库
+ * utils.js - Common Utility Functions Library
  * 
- * 该文件提供应用程序中使用的通用辅助函数，包括：
- * - 日志记录
- * - 错误处理
- * - 调试工具
- * - 加载进度显示
+ * This file provides common helper functions used in the application, including:
+ * - Logging
+ * - Error handling
+ * - Debug tools
+ * - Loading progress display
  */
 
-// 调试输出区域元素
+// Debug output area element
 const debugOutputEl = document.getElementById('debugOutput');
 
 /**
- * 记录调试信息到控制台和调试面板
- * @param {string} message - 要记录的消息
+ * Log debug information to console and debug panel
+ * @param {string} message - The message to log
  */
 export function log(message) {
-    console.log(`[公寓查看器] ${message}`);
+    console.log(`[Apartment Viewer] ${message}`);
     
-    // 如果调试输出元素存在，同时在UI中显示
+    // If debug output element exists, also display in UI
     if (debugOutputEl) {
         const timestamp = new Date().toLocaleTimeString();
         const logEntry = document.createElement('div');
@@ -26,18 +26,18 @@ export function log(message) {
         logEntry.innerHTML = `<span class="timestamp">${timestamp}</span> ${message}`;
         debugOutputEl.appendChild(logEntry);
         
-        // 限制显示的日志条目数量为最近的20条
+        // Limit the number of displayed log entries to the most recent 20
         while (debugOutputEl.childNodes.length > 20) {
             debugOutputEl.removeChild(debugOutputEl.firstChild);
         }
         
-        // 自动滚动到最新日志
+        // Auto-scroll to the latest log
         debugOutputEl.scrollTop = debugOutputEl.scrollHeight;
     }
 }
 
 /**
- * 切换调试面板的展开/折叠状态
+ * Toggle debug panel expand/collapse state
  */
 export function toggleDebug() {
     const debugContent = document.querySelector('.debug-content');
@@ -46,7 +46,7 @@ export function toggleDebug() {
     if (debugContent) {
         debugContent.classList.toggle('collapsed');
         
-        // 更新按钮图标
+        // Update button icon
         if (toggleBtn) {
             const icon = toggleBtn.querySelector('i');
             if (icon) {
@@ -61,13 +61,13 @@ export function toggleDebug() {
 }
 
 /**
- * 显示错误消息
- * @param {string} message - 错误消息
+ * Display error message
+ * @param {string} message - Error message
  */
 export function showError(message) {
-    console.error(`[错误] ${message}`);
+    console.error(`[Error] ${message}`);
     
-    // 创建错误提示元素
+    // Create error prompt element
     let errorElement = document.getElementById('errorMessage');
     
     if (!errorElement) {
@@ -80,12 +80,12 @@ export function showError(message) {
     errorElement.textContent = message;
     errorElement.classList.add('visible');
     
-    // 同时在调试面板中记录错误
-    log(`错误: ${message}`);
+    // Also log error in debug panel
+    log(`Error: ${message}`);
 }
 
 /**
- * 清除错误消息
+ * Clear error message
  */
 export function clearError() {
     const errorElement = document.getElementById('errorMessage');
@@ -100,9 +100,9 @@ export function clearError() {
 }
 
 /**
- * 更新加载进度条
- * @param {number} progress - 0到100之间的进度值
- * @param {string} [statusText] - 可选的状态文本
+ * Update loading progress bar
+ * @param {number} progress - Progress value between 0 and 100
+ * @param {string} [statusText] - Optional status text
  */
 export function updateLoadingProgress(progress, statusText) {
     const progressBar = document.querySelector('#loadingOverlay .progress-bar');
@@ -116,7 +116,7 @@ export function updateLoadingProgress(progress, statusText) {
         loadingText.textContent = statusText;
     }
     
-    // 如果进度达到100%，1秒后隐藏加载覆盖层
+    // If progress reaches 100%, hide loading overlay after 1 second
     if (progress >= 100) {
         setTimeout(() => {
             const overlay = document.getElementById('loadingOverlay');
@@ -128,8 +128,8 @@ export function updateLoadingProgress(progress, statusText) {
 }
 
 /**
- * 检查浏览器WebGL支持情况
- * @returns {boolean} 是否支持WebGL
+ * Check browser WebGL support
+ * @returns {boolean} Whether WebGL is supported
  */
 export function checkWebGLSupport() {
     try {
@@ -144,9 +144,9 @@ export function checkWebGLSupport() {
 }
 
 /**
- * 格式化文件大小为人类可读格式
- * @param {number} bytes - 字节数
- * @returns {string} 格式化后的大小（如 "1.5 MB"）
+ * Format file size to human-readable format
+ * @param {number} bytes - Number of bytes
+ * @returns {string} Formatted size (e.g., "1.5 MB")
  */
 export function formatFileSize(bytes) {
     if (bytes < 1024) return bytes + ' B';

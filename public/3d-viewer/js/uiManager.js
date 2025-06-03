@@ -1,11 +1,11 @@
 /**
- * uiManager.js - 用户界面交互管理模块
+ * uiManager.js - User Interface Interaction Management Module
  * 
- * 该文件负责管理用户界面交互，包括：
- * - 设置和处理UI事件监听
- * - 更新UI元素状态
- * - 管理界面提示显示
- * - 处理用户交互和反馈
+ * This file is responsible for managing user interface interactions, including:
+ * - Setting up and handling UI event listeners
+ * - Updating UI element states
+ * - Managing interface prompt displays
+ * - Handling user interactions and feedback
  */
 
 import { log, toggleDebug } from './utils.js';
@@ -16,19 +16,19 @@ export class UIManager {
         this.modelLoader = null;
         this.sceneManager = null;
         
-        // 注册UI事件监听器
+        // Register UI event listeners
         this.setupEventListeners();
     }
     
-    // 设置对模型加载器和场景管理器的引用
+    // Set references to model loader and scene manager
     setManagers(modelLoader, sceneManager) {
         this.modelLoader = modelLoader;
         this.sceneManager = sceneManager;
     }
     
-    // 设置UI事件监听器
+    // Set up UI event listeners
     setupEventListeners() {
-        // 线框模式切换按钮
+        // Wireframe mode toggle button
         const toggleWireframeBtn = document.getElementById('toggleWireframeBtn');
         if (toggleWireframeBtn) {
             toggleWireframeBtn.addEventListener('click', () => {
@@ -38,7 +38,7 @@ export class UIManager {
             });
         }
         
-        // 截图按钮
+        // Screenshot button
         const screenshotBtn = document.getElementById('screenshotBtn');
         if (screenshotBtn) {
             screenshotBtn.addEventListener('click', () => {
@@ -48,13 +48,13 @@ export class UIManager {
             });
         }
         
-        // 调试面板切换按钮
+        // Debug panel toggle button
         const toggleDebugBtn = document.getElementById('toggleDebugBtn');
         if (toggleDebugBtn) {
             toggleDebugBtn.addEventListener('click', toggleDebug);
         }
         
-        // 控制模式切换按钮
+        // Control mode toggle button
         const toggleControlModeBtn = document.getElementById('toggleControlModeBtn');
         if (toggleControlModeBtn) {
             toggleControlModeBtn.addEventListener('click', () => {
@@ -64,10 +64,10 @@ export class UIManager {
             });
         }
         
-        log('UI事件监听器已设置');
+        log('UI event listeners have been set up');
     }
     
-    // 显示加载覆盖层
+    // Show loading overlay
     showLoadingOverlay() {
         const overlay = document.getElementById('loadingOverlay');
         if (overlay) {
@@ -75,7 +75,7 @@ export class UIManager {
         }
     }
     
-    // 隐藏加载覆盖层
+    // Hide loading overlay
     hideLoadingOverlay() {
         const overlay = document.getElementById('loadingOverlay');
         if (overlay) {
@@ -83,7 +83,7 @@ export class UIManager {
         }
     }
     
-    // 显示或隐藏指针锁定提示
+    // Show or hide pointer lock prompt
     setPointerLockPromptVisible(visible) {
         const lockPrompt = document.getElementById('pointerLockPrompt');
         if (lockPrompt) {
@@ -95,7 +95,7 @@ export class UIManager {
         }
     }
     
-    // 显示或隐藏ESC退出提示
+    // Show or hide ESC exit prompt
     setEscPromptVisible(visible) {
         const escPrompt = document.getElementById('escExitPrompt');
         if (escPrompt) {
@@ -107,44 +107,44 @@ export class UIManager {
         }
     }
     
-    // 更新控制模式按钮文本和样式
+    // Update control mode button text and style
     updateControlModeButton(mode) {
         const button = document.getElementById('toggleControlModeBtn');
         const textElement = document.getElementById('controlModeText');
         
         if (button && textElement) {
             if (mode === 'fps') {
-                textElement.textContent = '切换到鼠标模式';
+                textElement.textContent = 'Switch to Mouse Mode';
                 button.classList.add('primary');
                 button.classList.remove('accent');
             } else {
-                textElement.textContent = '切换到FPS模式';
+                textElement.textContent = 'Switch to FPS Mode';
                 button.classList.remove('primary');
                 button.classList.add('accent');
             }
         }
     }
     
-    // 更新控制说明文本
+    // Update controls info text
     updateControlsInfoText(mode) {
         const controlsInfo = document.querySelector('.controls-info');
         if (controlsInfo) {
             if (mode === 'fps') {
                 controlsInfo.innerHTML = `
-                    <p><i class='bx bx-mouse'></i> 鼠标：控制视角</p>
-                    <p><i class='bx bx-joystick'></i> WASD：前后左右移动</p>
+                    <p><i class='bx bx-mouse'></i> Mouse: Control view</p>
+                    <p><i class='bx bx-joystick'></i> WASD: Move forward/back/left/right</p>
                 `;
             } else {
                 controlsInfo.innerHTML = `
-                    <p><i class='bx bx-mouse'></i> 鼠标左键：旋转视角</p>
-                    <p><i class='bx bx-mouse-alt'></i> 鼠标右键：平移</p>
-                    <p><i class='bx bx-mouse-alt'></i> 滚轮：缩放</p>
+                    <p><i class='bx bx-mouse'></i> Left click: Rotate view</p>
+                    <p><i class='bx bx-mouse-alt'></i> Right click: Pan</p>
+                    <p><i class='bx bx-mouse-alt'></i> Scroll wheel: Zoom</p>
                 `;
             }
         }
     }
     
-    // 更新线框模式按钮状态
+    // Update wireframe button state
     updateWireframeButton(isWireframe) {
         const btn = document.getElementById('toggleWireframeBtn');
         if (btn) {
