@@ -14,6 +14,7 @@ A modern 3D apartment showcase platform that combines an elegant gallery interfa
 - **Real Data Integration**: Uses actual apartment data from the Apartments folder
 - **Smart Preview System**: Prioritizes `shotcut.png` from apartment folders as preview images
 - **Intelligent Interaction**: Distinguishes between apartments with and without 3D models
+- **Dynamic Auto-Detection**: Automatically discovers new apartments without code changes
 
 ### 3D Viewer Capabilities
 - **Dual Control Modes**:
@@ -95,17 +96,109 @@ My_Apartment_Web/
 │   └── ui/                        # Base UI components
 ├── utils/                 # Utility functions
 │   └── apartment-data.ts  # Apartment data management
+├── scripts/              # Build scripts
+│   └── generate-apartments-list.js # Auto-generate apartment list
 ├── public/               # Static assets
 │   └── apartments/       # Apartment 3D model files
-│       ├── berlin_pankow/
+│       ├── 1_berlin_pankow/
 │       │   ├── textured_output.obj
 │       │   ├── textured_output.mtl
 │       │   ├── textured_output.jpg
+│       │   ├── shotcut.png
 │       │   └── config.json
-│       └── example_apartment/
-│           └── config.json
+│       ├── 2_test_model/
+│       │   └── config.json
+│       └── apartments-list.json    # Auto-generated apartment list
 └── package.json          # Project dependencies
 ```
+
+## 🏠 Dynamic Apartment Loading System
+
+### Overview
+
+This project implements a fully automated apartment detection and loading system. No code changes are needed when adding new apartments - simply add new apartment folders to the `public/apartments/` directory and they will automatically be recognized and displayed.
+
+### How It Works
+
+#### 1. Auto-Scan Script
+
+The `scripts/generate-apartments-list.js` script:
+- Scans all folders in the `public/apartments/` directory
+- Validates that each folder contains a valid `config.json`
+- Checks for 3D model files (`textured_output.obj`)
+- Checks for preview images (`shotcut.png`)
+- Generates `public/apartments-list.json` file
+
+#### 2. Automatic Execution
+
+- **Development**: The `predev` script automatically runs the scan when executing `npm run dev`
+- **Build**: The `prebuild` script automatically runs the scan when executing `npm run build`
+- **Vercel Deployment**: The build script automatically executes during each deployment
+
+#### 3. Frontend Dynamic Loading
+
+`utils/apartment-data.ts`:
+- Loads the `apartments-list.json` file
+- Dynamically loads each apartment's configuration
+- Displays apartments sorted by folder name (string sort)
+
+### Adding New Apartments
+
+#### Steps
+
+1. **Create new folder** under `public/apartments/` (recommend using numeric prefix for ordering):
+   ```
+   public/apartments/5_new_apartment/
+   ```
+
+2. **Add required `config.json` file**:
+   ```json
+   {
+     "name": "Apartment Display Name",
+     "description": "Apartment description\nSupports line breaks",
+     "camera": {
+       "height": 1.7,
+       "init_point": [0, 0]
+     }
+   }
+   ```
+
+3. **Optional files**:
+   - `textured_output.obj` - 3D model file
+   - `textured_output.mtl` - Material file
+   - `textured_output.jpg` - Texture image
+   - `shotcut.png` - Preview image
+
+#### File Structure Example
+
+```
+public/apartments/
+├── 1_berlin_pankow/
+│   ├── config.json           # Required
+│   ├── shotcut.png          # Optional: Preview image
+│   ├── textured_output.obj  # Optional: 3D model
+│   ├── textured_output.mtl  # Optional: Material
+│   └── textured_output.jpg  # Optional: Texture
+├── 2_test_model/
+│   └── config.json          # Required
+└── apartments-list.json     # Auto-generated, do not edit manually
+```
+
+#### Important Notes
+
+1. **Folder Naming**: Use numeric prefixes (e.g., `1_`, `2_`) to control display order
+2. **config.json**: Must be valid JSON format, otherwise the apartment will be ignored
+3. **Preview Image Priority**:
+   - First choice: `shotcut.png`
+   - Second choice: `textured_output.jpg`
+   - Fallback: Default placeholder
+4. **3D Model Button**: "View 3D Model" button only appears when `textured_output.obj` exists
+
+#### Development Tips
+
+- After modifying apartments, refresh the page to see updates (development environment automatically regenerates the list)
+- `apartments-list.json` is added to `.gitignore` and won't be committed to version control
+- Production environment regenerates the apartment list on each deployment
 
 ## 🎮 3D Viewer Usage
 
@@ -130,41 +223,6 @@ My_Apartment_Web/
 - **Wireframe Mode**: View model wireframe structure
 - **Quality Control**: Adjust render quality for performance balance
 - **Screenshot**: Save current view as image
-
-## 🏠 Adding New Apartment Models
-
-To add a new apartment model:
-
-1. **Prepare Model Files**:
-   ```
-   public/apartments/new_apartment_name/
-   ├── textured_output.obj  # 3D model file
-   ├── textured_output.mtl  # Material file
-   ├── textured_output.jpg  # Texture image
-   ├── shotcut.png          # Preview image (recommended)
-   └── config.json          # Configuration file
-   ```
-
-2. **Create Configuration File** (`config.json`):
-   ```json
-   {
-       "name": "Apartment Display Name",
-       "camera": {
-           "height": 1.7,
-           "init_point": [0, 10]
-       }
-   }
-   ```
-
-3. **Update Data File** (`utils/apartment-data.ts`):
-   - Add new apartment data object to `apartments` array
-   - If apartment has `shotcut.png`, add apartment ID to `APARTMENTS_WITH_SHOTCUT` array
-
-### Preview Image Priority
-The system selects preview images in the following priority:
-1. **shotcut.png** - Dedicated preview image (if exists)
-2. **textured_output.jpg** - 3D model texture as fallback
-3. **placeholder.svg** - Default placeholder
 
 ## 🌐 Browser Compatibility
 

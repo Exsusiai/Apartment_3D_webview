@@ -3,6 +3,7 @@
 
 export interface ApartmentConfig {
   name: string;
+  description?: string;
   camera: {
     height: number;
     init_point: [number, number];
@@ -19,118 +20,148 @@ export interface ApartmentData {
   hasModel: boolean;
 }
 
-// 从Apartments文件夹获取的真实数据
-export const APARTMENT_FOLDERS = ['berlin_pankow', 'example_apartment'];
+// 公寓列表接口
+interface ApartmentListItem {
+  id: string;
+  hasModel: boolean;
+  hasShotcut: boolean;
+}
 
-// 已知有shotcut.png的公寓列表（可以根据实际情况更新）
-const APARTMENTS_WITH_SHOTCUT = ['berlin_pankow'];
+interface ApartmentsList {
+  apartments: ApartmentListItem[];
+  generatedAt: string;
+}
+
+// 动态加载公寓列表
+async function loadApartmentsList(): Promise<ApartmentsList> {
+  try {
+    const response = await fetch('/apartments-list.json');
+    if (!response.ok) {
+      throw new Error('Failed to load apartments list');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error loading apartments list:', error);
+    // 返回空列表作为 fallback
+    return { apartments: [], generatedAt: new Date().toISOString() };
+  }
+}
+
+// 动态加载公寓配置的函数
+export async function loadApartmentConfig(apartmentId: string): Promise<ApartmentConfig | null> {
+  try {
+    const response = await fetch(`/apartments/${apartmentId}/config.json`);
+    if (!response.ok) {
+      console.warn(`Failed to load config for ${apartmentId}: ${response.status}`);
+      return null;
+    }
+    const config = await response.json();
+    return config;
+  } catch (error) {
+    console.warn(`Error loading config for ${apartmentId}:`, error);
+    return null;
+  }
+}
 
 // 生成缩略图路径的函数
-function getThumbnailPath(apartmentId: string): string {
-  // 对于占位符，直接返回占位符图片
-  if (apartmentId.startsWith('placeholder_')) {
-    return '/placeholder.svg?height=400&width=400';
-  }
-  
-  // 优先使用shotcut.png（如果该公寓有的话）
-  if (APARTMENTS_WITH_SHOTCUT.includes(apartmentId)) {
+function getThumbnailPath(apartmentId: string, hasShotcut: boolean): string {
+  if (hasShotcut) {
     return `/apartments/${apartmentId}/shotcut.png`;
   }
   
-  // 回退策略：根据已知的公寓结构选择合适的图片
-  switch (apartmentId) {
-    case 'berlin_pankow':
-      return '/apartments/berlin_pankow/textured_output.jpg';
-    default:
-      return '/placeholder.svg?height=400&width=400';
-  }
+  // 如果没有 shotcut.png，尝试使用 textured_output.jpg
+  // 但由于我们是前端，无法检查文件是否存在，所以直接返回路径
+  // 如果不存在，浏览器会处理 404
+  return `/apartments/${apartmentId}/textured_output.jpg`;
 }
 
-// 添加新公寓时的辅助函数
-export function addApartmentWithShotcut(apartmentId: string) {
-  if (!APARTMENTS_WITH_SHOTCUT.includes(apartmentId)) {
-    APARTMENTS_WITH_SHOTCUT.push(apartmentId);
+// 默认配置，用于fallback
+const DEFAULT_CONFIG: ApartmentConfig = {
+  name: 'Apartment',
+  description: 'No description available',
+  camera: {
+    height: 1.7,
+    init_point: [0, 0]
   }
+};
+
+// 动态创建公寓数据的函数
+async function createApartmentData(apartment: ApartmentListItem): Promise<ApartmentData> {
+  const config = await loadApartmentConfig(apartment.id) || DEFAULT_CONFIG;
+  
+  // 格式化description中的换行符
+  const formattedDescription = config.description 
+    ? config.description.replace(/\\n/g, '\n')
+    : DEFAULT_CONFIG.description!;
+  
+  // 获取缩略图路径
+  let thumbnail = getThumbnailPath(apartment.id, apartment.hasShotcut);
+  
+  // 如果既没有 shotcut 也没有模型（可能没有 textured_output.jpg），使用占位符
+  if (!apartment.hasShotcut && !apartment.hasModel) {
+    thumbnail = '/placeholder.svg?height=400&width=400';
+  }
+  
+  return {
+    id: apartment.id,
+    title: config.name,
+    description: formattedDescription,
+    thumbnail: thumbnail,
+    modelPath: `/apartments/${apartment.id}`,
+    config: {
+      ...config,
+      description: formattedDescription
+    },
+    hasModel: apartment.hasModel
+  };
 }
 
-// 创建公寓数据数组，包括空位
-export const apartments: ApartmentData[] = [
-  // Berlin Pankow 公寓
-  {
-    id: 'berlin_pankow',
-    title: 'Berlin Pankow Apartment',
-    description: 'A real 3D scanned apartment model located in Berlin Pankow district. Using high-precision scanning technology to completely restore the actual spatial layout and details, providing an immersive spatial browsing experience.',
-    thumbnail: getThumbnailPath('berlin_pankow'),
-    modelPath: '/apartments/berlin_pankow',
-    config: {
-      name: 'Berlin Pankow',
-      camera: {
-        height: 1.3,
-        init_point: [0, 0]
-      }
-    },
-    hasModel: true
-  },
-  // 示例公寓
-  {
-    id: 'example_apartment',
-    title: 'Example Apartment (Demo)',
-    description: 'This is a demonstration example apartment model used to showcase the basic functions and interaction methods of the 3D viewer. Suitable for experiencing different control modes and perspective switching.',
-    thumbnail: getThumbnailPath('example_apartment'),
-    modelPath: '/apartments/example_apartment',
-    config: {
-      name: 'Example Apartment (Demo)',
-      camera: {
-        height: 1.8,
-        init_point: [5, 15]
-      }
-    },
-    hasModel: false // example_apartment目前只有config.json
-  },
-  // 空位1
-  {
-    id: 'placeholder_1',
-    title: 'More Apartments Coming Soon',
-    description: 'We are scanning and processing more apartment models, stay tuned. If you are interested in showcasing your apartment, please contact us.',
-    thumbnail: getThumbnailPath('placeholder_1'),
-    modelPath: '',
-    config: {
-      name: 'To be added',
-      camera: { height: 1.7, init_point: [0, 0] }
-    },
-    hasModel: false
-  },
-  // 空位2
-  {
-    id: 'placeholder_2',
-    title: 'More Apartments Coming Soon',
-    description: 'We are scanning and processing more apartment models, stay tuned. If you are interested in showcasing your apartment, please contact us.',
-    thumbnail: getThumbnailPath('placeholder_2'),
-    modelPath: '',
-    config: {
-      name: 'To be added',
-      camera: { height: 1.7, init_point: [0, 0] }
-    },
-    hasModel: false
-  }
-];
+// 创建公寓数据数组
+let apartmentsCache: ApartmentData[] | null = null;
+let apartmentsListCache: ApartmentsList | null = null;
 
-// 获取所有可用的公寓数据
-export function getApartments(): ApartmentData[] {
+export async function getApartments(): Promise<ApartmentData[]> {
+  // 如果有缓存，直接返回
+  if (apartmentsCache) {
+    return apartmentsCache;
+  }
+
+  // 加载公寓列表
+  if (!apartmentsListCache) {
+    apartmentsListCache = await loadApartmentsList();
+  }
+
+  const apartments: ApartmentData[] = [];
+  
+  // 动态加载每个公寓的数据
+  for (const apartment of apartmentsListCache.apartments) {
+    try {
+      const apartmentData = await createApartmentData(apartment);
+      apartments.push(apartmentData);
+    } catch (error) {
+      console.error(`Failed to create apartment data for ${apartment.id}:`, error);
+    }
+  }
+
+  // 缓存结果
+  apartmentsCache = apartments;
   return apartments;
 }
 
 // 根据ID获取特定公寓数据
-export function getApartmentById(id: string): ApartmentData | null {
+export async function getApartmentById(id: string): Promise<ApartmentData | null> {
+  const apartments = await getApartments();
   return apartments.find(apt => apt.id === id) || null;
 }
 
 // 获取有3D模型的公寓
-export function getApartmentsWithModels(): ApartmentData[] {
+export async function getApartmentsWithModels(): Promise<ApartmentData[]> {
+  const apartments = await getApartments();
   return apartments.filter(apt => apt.hasModel);
 }
 
-// 检查公寓是否有shotcut.png预览图的函数
-export function hasShortcutImage(apartmentId: string): boolean {
-  return APARTMENTS_WITH_SHOTCUT.includes(apartmentId);
+// 清除缓存的函数（用于开发时重新加载）
+export function clearApartmentsCache() {
+  apartmentsCache = null;
+  apartmentsListCache = null;
 } 

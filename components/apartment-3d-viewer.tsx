@@ -284,6 +284,19 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 <h3>📷 Screenshot</h3>
                 <button id="screenshotBtn" class="btn full-width">Save Screenshot</button>
             </div>
+
+            <div class="panel">
+                <h3>💡 Lighting Control</h3>
+                <label for="brightnessSlider">Overall Brightness:</label>
+                <input type="range" id="brightnessSlider" min="0.4" max="1.2" step="0.05" value="0.8" style="width: 100%; margin: 8px 0;">
+                <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                    <span>Dark</span>
+                    <span style="float: right;">Bright</span>
+                </div>
+                <div class="controls-group">
+                    <button id="resetLightingBtn" class="btn secondary full-width">Reset Lighting</button>
+                </div>
+            </div>
         </div>
 
         <div class="model-view">
@@ -332,10 +345,18 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         let currentControlMode = 'orbit'; // 'orbit' or 'fps'
         let animationId = null; // 用于清理动画循环
         let keyboardControls = null; // 键盘控制器
+        let lightSources = []; // 存储所有光源用于亮度控制
+        let baseLightIntensities = {}; // 存储光源的基础亮度值
         
         // 公寓配置
         const apartmentConfig = ${JSON.stringify(apartment.config)};
         const modelPath = "${apartment.modelPath}";
+        
+        // 调试：输出配置信息
+        console.log('Raw apartment object passed to iframe:', ${JSON.stringify(apartment)});
+        console.log('Apartment config received:', apartmentConfig);
+        console.log('Config camera height:', apartmentConfig.camera.height);
+        console.log('Config camera object:', apartmentConfig.camera);
         
         // 键盘控制类 - 完整的WASD移动逻辑
         class KeyboardControls {
@@ -607,20 +628,85 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function setupLighting() {
-            // 环境光
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            // 清空之前的光源
+            lightSources = [];
+            baseLightIntensities = {};
+            
+            // 强化环境光 - 降低基础亮度适配新的滑块范围
+            const ambientLight = new THREE.AmbientLight(0x606060, 0.5);
             scene.add(ambientLight);
+            lightSources.push(ambientLight);
+            baseLightIntensities['ambientLight'] = 0.5;
             
-            // 方向光
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 10, 5);
-            directionalLight.castShadow = true;
-            scene.add(directionalLight);
+            // 半球光 - 模拟天空和地面的反射光
+            const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.3);
+            hemisphereLight.position.set(0, 20, 0);
+            scene.add(hemisphereLight);
+            lightSources.push(hemisphereLight);
+            baseLightIntensities['hemisphereLight'] = 0.3;
             
-            // 点光源
-            const pointLight = new THREE.PointLight(0xffffff, 0.5);
-            pointLight.position.set(0, 5, 0);
-            scene.add(pointLight);
+            // 主方向光 - 模拟窗户进来的阳光
+            const mainDirectionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            mainDirectionalLight.position.set(15, 15, 10);
+            mainDirectionalLight.castShadow = true;
+            mainDirectionalLight.shadow.mapSize.width = 2048;
+            mainDirectionalLight.shadow.mapSize.height = 2048;
+            scene.add(mainDirectionalLight);
+            lightSources.push(mainDirectionalLight);
+            baseLightIntensities['mainDirectionalLight'] = 0.6;
+            
+            // 辅助方向光 - 从另一个角度补光
+            const secondaryDirectionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            secondaryDirectionalLight.position.set(-10, 12, -8);
+            scene.add(secondaryDirectionalLight);
+            lightSources.push(secondaryDirectionalLight);
+            baseLightIntensities['secondaryDirectionalLight'] = 0.3;
+            
+            // 室内点光源1 - 模拟天花板灯
+            const ceilingLight1 = new THREE.PointLight(0xffffff, 0.4, 20);
+            ceilingLight1.position.set(2, 3, 2);
+            scene.add(ceilingLight1);
+            lightSources.push(ceilingLight1);
+            baseLightIntensities['ceilingLight1'] = 0.4;
+            
+            // 室内点光源2 - 模拟另一盏天花板灯
+            const ceilingLight2 = new THREE.PointLight(0xffffff, 0.4, 20);
+            ceilingLight2.position.set(-2, 3, -2);
+            scene.add(ceilingLight2);
+            lightSources.push(ceilingLight2);
+            baseLightIntensities['ceilingLight2'] = 0.4;
+            
+            // 温暖点光源 - 模拟台灯或壁灯
+            const warmLight = new THREE.PointLight(0xffeaa7, 0.3, 15);
+            warmLight.position.set(0, 2, 0);
+            scene.add(warmLight);
+            lightSources.push(warmLight);
+            baseLightIntensities['warmLight'] = 0.3;
+            
+            // 填充光 - 消除过暗的阴影
+            const fillLight1 = new THREE.DirectionalLight(0xffffff, 0.15);
+            fillLight1.position.set(5, 5, -10);
+            scene.add(fillLight1);
+            lightSources.push(fillLight1);
+            baseLightIntensities['fillLight1'] = 0.15;
+            
+            const fillLight2 = new THREE.DirectionalLight(0xffffff, 0.15);
+            fillLight2.position.set(-5, 5, 10);
+            scene.add(fillLight2);
+            lightSources.push(fillLight2);
+            baseLightIntensities['fillLight2'] = 0.15;
+            
+            // 根据滑块默认值调整初始亮度
+            const defaultBrightness = 0.8;
+            lightSources.forEach((light, index) => {
+                const lightKeys = Object.keys(baseLightIntensities);
+                if (lightKeys[index]) {
+                    const baseIntensity = baseLightIntensities[lightKeys[index]];
+                    light.intensity = baseIntensity * defaultBrightness;
+                }
+            });
+            
+            console.log('Enhanced lighting setup completed with adjusted brightness levels, initial brightness set to:', defaultBrightness);
         }
         
         function loadModel() {
@@ -649,14 +735,26 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                         const center = box.getCenter(new THREE.Vector3());
                         const size = box.getSize(new THREE.Vector3());
                         
-                        // 调整相机位置
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        const fov = camera.fov * (Math.PI / 180);
-                        let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-                        cameraZ *= 1.5; // 增加一些距离
+                        // 计算地板高度（模型最低点）
+                        const floorHeight = box.min.y;
                         
-                        camera.position.set(center.x, center.y + apartmentConfig.camera.height, center.z + cameraZ);
+                        // 计算相机的正确高度：地板高度 + 配置的相机高度
+                        const cameraHeight = floorHeight + apartmentConfig.camera.height;
+                        
+                        // 使用配置文件中的init_point作为相机初始位置
+                        const initX = apartmentConfig.camera.init_point[0];
+                        const initZ = apartmentConfig.camera.init_point[1];
+                        
+                        // 设置相机位置 - 使用配置的init_point和计算的高度
+                        camera.position.set(initX, cameraHeight, initZ);
+                        
+                        // 轨道控制器的目标点设置为模型中心
                         orbitControls.target.copy(center);
+                        
+                        // 更新键盘控制器的固定高度为正确的值
+                        keyboardControls.setFixedHeight(cameraHeight);
+                        
+                        console.log('Model loaded. Floor height: ' + floorHeight.toFixed(2) + 'm, Camera height: ' + cameraHeight.toFixed(2) + 'm, Config height: ' + apartmentConfig.camera.height + 'm, Init point: [' + initX + ', ' + initZ + ']');
                         
                         // 隐藏加载界面
                         loadingOverlay.style.display = 'none';
@@ -695,6 +793,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             
             // 质量控制
             document.getElementById('qualitySelector').addEventListener('change', changeQuality);
+            
+            // 灯光控制
+            document.getElementById('brightnessSlider').addEventListener('input', adjustBrightness);
+            document.getElementById('resetLightingBtn').addEventListener('click', resetLighting);
             
             // FPS模式相关
             document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
@@ -782,10 +884,14 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z);
+            const floorHeight = box.min.y;
+            const cameraHeight = floorHeight + apartmentConfig.camera.height;
             
-            camera.position.set(center.x, center.y + apartmentConfig.camera.height, center.z + maxDim * 1.5);
+            // 使用配置的init_point重置相机位置
+            const initX = apartmentConfig.camera.init_point[0];
+            const initZ = apartmentConfig.camera.init_point[1];
+            
+            camera.position.set(initX, cameraHeight, initZ);
             orbitControls.target.copy(center);
             orbitControls.update();
         }
@@ -803,7 +909,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         
         function takeScreenshot() {
             const link = document.createElement('a');
-            link.download = \`\${apartmentConfig.name}_screenshot.png\`;
+            link.download = apartmentConfig.name + '_screenshot.png';
             link.href = renderer.domElement.toDataURL();
             link.click();
         }
@@ -825,6 +931,37 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             }
             
             renderer.setPixelRatio(pixelRatio);
+        }
+        
+        function adjustBrightness(event) {
+            const brightness = parseFloat(event.target.value);
+            
+            // 遍历所有光源，按比例调整亮度
+            lightSources.forEach((light, index) => {
+                const lightKeys = Object.keys(baseLightIntensities);
+                if (lightKeys[index]) {
+                    const baseIntensity = baseLightIntensities[lightKeys[index]];
+                    light.intensity = baseIntensity * brightness;
+                }
+            });
+            
+            console.log('Brightness adjusted to:', brightness);
+        }
+        
+        function resetLighting() {
+            // 重置亮度滑块到默认值
+            document.getElementById('brightnessSlider').value = '0.8';
+            
+            // 重置所有光源到基础亮度
+            lightSources.forEach((light, index) => {
+                const lightKeys = Object.keys(baseLightIntensities);
+                if (lightKeys[index]) {
+                    const baseIntensity = baseLightIntensities[lightKeys[index]];
+                    light.intensity = baseIntensity;
+                }
+            });
+            
+            console.log('Lighting reset to default values');
         }
         
         function onKeyDown(event) {

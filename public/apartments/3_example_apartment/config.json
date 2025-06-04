@@ -1,0 +1,8 @@
+{
+    "name": "Example Apartment (Demo)",
+    "description": "This is a demo apartment model for showcasing the basic features and interaction of the 3D viewer.",
+    "camera": {
+        "height": 1.8,
+        "init_point": [5, 15]
+    }
+} 

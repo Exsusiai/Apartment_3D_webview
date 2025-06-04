@@ -48,8 +48,15 @@ function ApartmentCard({
     }
   }
 
-  // 判断是否为占位符
-  const isPlaceholder = apartment.id.startsWith('placeholder_')
+  // 格式化description以正确显示换行符
+  const formatDescription = (description: string) => {
+    return description.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < description.split('\n').length - 1 && <br />}
+      </span>
+    ));
+  };
 
   return (
     <>
@@ -67,8 +74,7 @@ function ApartmentCard({
               <div
                 className={cn(
                   "relative w-[90%] md:w-[400px] h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden rounded-lg border border-gray-100",
-                  apartment.hasModel ? "cursor-pointer" : "cursor-default",
-                  isPlaceholder ? "opacity-60" : ""
+                  apartment.hasModel ? "cursor-pointer" : "cursor-default"
                 )}
                 onClick={handleCardClick}
               >
@@ -79,11 +85,6 @@ function ApartmentCard({
                 {apartment.hasModel && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20">
                     <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">View 3D Model</span>
-                  </div>
-                )}
-                {isPlaceholder && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">Coming Soon</span>
                   </div>
                 )}
                 <div className={cn(
@@ -100,14 +101,8 @@ function ApartmentCard({
             ) : (
               // 奇数索引：左侧为文字
               <div className="w-[90%] md:w-[400px] flex flex-col justify-end text-right pr-4">
-                <h3 className={cn(
-                  "text-lg sm:text-xl md:text-2xl font-medium mb-2",
-                  isPlaceholder ? "text-gray-500" : "text-gray-900"
-                )}>{apartment.title}</h3>
-                <p className={cn(
-                  "text-sm sm:text-base",
-                  isPlaceholder ? "text-gray-400" : "text-gray-600"
-                )}>{apartment.description}</p>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-medium mb-2 text-gray-900">{apartment.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600">{formatDescription(apartment.description)}</p>
                 {apartment.hasModel && (
                   <button
                     onClick={handleCardClick}
@@ -128,14 +123,8 @@ function ApartmentCard({
             {isEven ? (
               // 偶数索引：右侧为文字
               <div className="w-[90%] md:w-[400px] flex flex-col justify-end text-left pl-4">
-                <h3 className={cn(
-                  "text-lg sm:text-xl md:text-2xl font-medium mb-2",
-                  isPlaceholder ? "text-gray-500" : "text-gray-900"
-                )}>{apartment.title}</h3>
-                <p className={cn(
-                  "text-sm sm:text-base",
-                  isPlaceholder ? "text-gray-400" : "text-gray-600"
-                )}>{apartment.description}</p>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-medium mb-2 text-gray-900">{apartment.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600">{formatDescription(apartment.description)}</p>
                 {apartment.hasModel && (
                   <button
                     onClick={handleCardClick}
@@ -150,8 +139,7 @@ function ApartmentCard({
               <div
                 className={cn(
                   "relative w-[90%] md:w-[400px] h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden rounded-lg border border-gray-100",
-                  apartment.hasModel ? "cursor-pointer" : "cursor-default",
-                  isPlaceholder ? "opacity-60" : ""
+                  apartment.hasModel ? "cursor-pointer" : "cursor-default"
                 )}
                 onClick={handleCardClick}
               >
@@ -162,11 +150,6 @@ function ApartmentCard({
                 {apartment.hasModel && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20">
                     <span className="px-4 py-2 bg-white/90 rounded-md text-sm font-medium">View 3D Model</span>
-                  </div>
-                )}
-                {isPlaceholder && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="px-4 py-2 bg-gray-100/90 rounded-md text-sm font-medium text-gray-600">Coming Soon</span>
                   </div>
                 )}
                 <div className={cn(
@@ -198,11 +181,11 @@ function ApartmentCard({
       <Dialog open={!!selectedApartment} onOpenChange={(open) => !open && setSelectedApartment(null)}>
         <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0">
           <DialogTitle className="sr-only">
-            {selectedApartment?.title} - 3D Viewer
+            {selectedApartment?.title} 3D Model
           </DialogTitle>
           {selectedApartment && (
-            <Apartment3DViewer 
-              apartment={selectedApartment} 
+            <Apartment3DViewer
+              apartment={selectedApartment}
               onClose={() => setSelectedApartment(null)}
             />
           )}
@@ -213,60 +196,102 @@ function ApartmentCard({
 }
 
 export function ApartmentGallery() {
-  const galleryRef = useRef<HTMLDivElement>(null)
-  const [axisHeight, setAxisHeight] = useState("100%")
-  
-  // 获取真实的公寓数据
-  const apartments = getApartments()
+  const [apartments, setApartments] = useState<ApartmentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const axisRef = useRef<HTMLDivElement>(null);
 
-  // 计算中轴线的高度，确保它只覆盖gallery区域，不延伸到About部分
+  // 动态加载公寓数据
+  useEffect(() => {
+    const loadApartments = async () => {
+      try {
+        setLoading(true);
+        const apartmentData = await getApartments();
+        setApartments(apartmentData);
+      } catch (err) {
+        console.error('Failed to load apartments:', err);
+        setError('Failed to load apartment data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApartments();
+  }, []);
+
+  // 动态更新轴线高度
   useEffect(() => {
     const updateAxisHeight = () => {
-      if (galleryRef.current) {
-        // 获取gallery容器内容的实际高度
-        const contentHeight = galleryRef.current.clientHeight
-        // 只给中轴线设置到gallery内容结束的位置，不添加额外高度
-        setAxisHeight(`${contentHeight}px`)
+      if (axisRef.current) {
+        const galleryHeight = document.querySelector('.apartment-gallery')?.scrollHeight || 0;
+        axisRef.current.style.height = `${galleryHeight - 100}px`;
       }
-    }
+    };
 
     // 初始更新
-    setTimeout(updateAxisHeight, 100) // 短暂延迟确保DOM渲染完成
+    updateAxisHeight();
 
-    // 设置ResizeObserver
-    const resizeObserver = new ResizeObserver(updateAxisHeight)
-    if (galleryRef.current) {
-      resizeObserver.observe(galleryRef.current)
+    // 监听窗口大小变化
+    const handleResize = () => {
+      setTimeout(updateAxisHeight, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    // 监听内容变化
+    const observer = new ResizeObserver(() => {
+      setTimeout(updateAxisHeight, 100);
+    });
+
+    if (axisRef.current) {
+      observer.observe(axisRef.current);
     }
 
-    // 在窗口大小变化时也更新
-    window.addEventListener("resize", updateAxisHeight)
-
-    // 清理函数
     return () => {
-      if (galleryRef.current) {
-        resizeObserver.unobserve(galleryRef.current)
-      }
-      window.removeEventListener("resize", updateAxisHeight)
-    }
-  }, [])
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
+  }, [apartments]);
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-white min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading apartments...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-white min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <div
-      id="apartment-gallery"
-      className="container mx-auto pt-0 pb-16 md:pb-24 px-4 md:px-8 relative border-none"
-      ref={galleryRef}
-    >
-      {/* 添加一个锚点元素，用于更精确的滚动定位 */}
-      <div id="gallery-anchor" className="absolute" style={{ top: "-100px" }}></div>
+    <section className="py-16 bg-white relative apartment-gallery">
+      {/* 中央轴线 */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:block">
+        <div
+          ref={axisRef}
+          className="w-0.5 bg-gradient-to-b from-gray-300 via-gray-200 to-transparent"
+          style={{ height: 'auto' }}
+        />
+      </div>
 
-      {/* 中轴线 - 只覆盖gallery区域，不延伸到About部分 */}
-      <div
-        className="absolute left-1/2 top-0 w-[2px] md:w-[3px] bg-gray-200 md:bg-gray-300 transform -translate-x-1/2 z-10"
-        style={{ height: axisHeight }}
-      />
-
-      <div className="relative">
+      <div className="container mx-auto px-4 relative z-10">
         {apartments.map((apartment, index) => (
           <ApartmentCard
             key={apartment.id}
@@ -276,6 +301,6 @@ export function ApartmentGallery() {
           />
         ))}
       </div>
-    </div>
+    </section>
   )
 }

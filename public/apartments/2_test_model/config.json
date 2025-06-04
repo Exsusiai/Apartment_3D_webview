@@ -1,0 +1,8 @@
+{
+    "name": "Apartment Model Demo",
+    "description": " Apartment in Berlin\n 3D Model Test",
+    "camera": {
+        "height": 0.7,
+        "init_point": [0.5, -1]
+    }
+} 

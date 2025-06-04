@@ -4,7 +4,9 @@
   "private": true,
   "description": "Merged apartment gallery with 3D viewer functionality",
   "scripts": {
+    "predev": "node scripts/generate-apartments-list.js",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-apartments-list.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
