@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json  # 注释掉这行，确保package-lock.json被包含在版本控制中
 
 # Next.js build outputs
 .next/
