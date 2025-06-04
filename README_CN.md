@@ -1,5 +1,7 @@
 # About MemoSpace
 
+[**网站预览**](https://memospace.jingsheng.dev/)
+
 [中文版本](README_CN.md) | [English](README.md)
 
 一个现代化的3D公寓展示平台，结合了优雅的画廊界面和强大的3D查看器功能。该项目成功地将公寓画廊和3D查看器功能合并为一个统一的平台。

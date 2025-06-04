@@ -1,0 +1,20 @@
+{
+  "apartments": [
+    {
+      "id": "1_berlin_pankow",
+      "hasModel": true,
+      "hasShotcut": true
+    },
+    {
+      "id": "2_test_model",
+      "hasModel": true,
+      "hasShotcut": true
+    },
+    {
+      "id": "3_example_apartment",
+      "hasModel": false,
+      "hasShotcut": false
+    }
+  ],
+  "generatedAt": "2025-06-04T14:23:53.133Z"
+}

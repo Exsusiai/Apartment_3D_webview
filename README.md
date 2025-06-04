@@ -2,6 +2,8 @@
 
 [中文版本](README_CN.md) | [English](README.md)
 
+[**Website Preview**](https://memospace.jingsheng.dev/)
+
 A modern 3D apartment showcase platform that combines an elegant gallery interface with powerful 3D viewer functionality. This project successfully merges apartment gallery and 3D viewer capabilities into a unified platform.
 
 ⚠️Note: This is a project generated entirely by AI, and the project code is completely driven by prompt + Cursor + claude 4, so the code and project architecture are not for reference. For the Cursor Rule used in this project, please refer to [Cursor_Rule](cursor_rule.md)
