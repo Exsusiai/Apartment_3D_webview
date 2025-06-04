@@ -2,11 +2,5 @@
   "buildCommand": "npm run build",
   "framework": "nextjs",
   "installCommand": "npm install --legacy-peer-deps",
-  "outputDirectory": ".next",
-  "rewrites": [
-    {
-      "source": "/projects/memospace/:path*",
-      "destination": "/:path*"
-    }
-  ]
+  "outputDirectory": ".next"
 } 

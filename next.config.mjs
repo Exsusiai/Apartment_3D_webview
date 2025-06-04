@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/projects/memospace',
-  assetPrefix: '/projects/memospace',
   eslint: {
     ignoreDuringBuilds: true,
   },
