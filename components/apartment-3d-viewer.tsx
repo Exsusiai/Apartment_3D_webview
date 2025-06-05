@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { ApartmentData } from "@/utils/apartment-data"
+import { isMobileDevice, getDeviceType } from "@/utils/device-utils"
 
 interface Apartment3DViewerProps {
   apartment: ApartmentData
@@ -13,6 +14,19 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [iframeKey, setIframeKey] = useState(0) // 添加key来强制重新创建iframe
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    // 检测是否为移动设备
+    setIsMobile(isMobileDevice())
+    
+    const handleResize = () => {
+      setIsMobile(isMobileDevice())
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     if (!apartment.hasModel) {
@@ -29,12 +43,14 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
     const timer = setTimeout(() => {
       // 创建3D查看器的HTML内容
       const create3DViewerHTML = () => {
+        const isMobileStr = isMobile ? 'true' : 'false';
+        
         return `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>${apartment.title} - 3D Viewer</title>
     <style>
         body {
@@ -43,6 +59,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             overflow: hidden;
+            touch-action: none; /* 防止默认的触摸行为 */
         }
         
         .viewer-container {
@@ -58,6 +75,44 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             padding: 20px;
             overflow-y: auto;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: ${isMobile ? 'none' : 'block'};
+        }
+        
+        .mobile-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            padding: 16px;
+            border-top: 1px solid #e5e5e5;
+            display: ${isMobile ? 'block' : 'none'};
+            z-index: 100;
+        }
+        
+        .mobile-controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .mobile-controls-content {
+            display: none;
+        }
+        
+        .mobile-controls.expanded .mobile-controls-content {
+            display: block;
+        }
+        
+        .toggle-controls-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
         }
         
         .model-view {
@@ -80,7 +135,14 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             margin-bottom: 16px;
         }
         
-        .panel h3 {
+        .mobile-panel {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 12px;
+        }
+        
+        .panel h3, .mobile-panel h3 {
             margin: 0 0 12px 0;
             font-size: 14px;
             font-weight: 600;
@@ -119,6 +181,11 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             margin: 4px 0;
         }
         
+        .btn.small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
         .controls-group {
             display: flex;
             flex-wrap: wrap;
@@ -129,6 +196,12 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         .controls-group .btn {
             flex: 1;
             min-width: 80px;
+        }
+        
+        .mobile-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
         }
         
         select {
@@ -150,6 +223,20 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             border-radius: 6px;
             font-size: 12px;
             z-index: 100;
+            display: ${isMobile ? 'none' : 'block'};
+        }
+        
+        .mobile-view-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            z-index: 100;
+            display: ${isMobile ? 'block' : 'none'};
         }
         
         .esc-prompt {
@@ -239,10 +326,32 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         .close-btn:hover {
             background: rgba(0,0,0,0.7);
         }
+        
+        /* 移动端触摸提示 */
+        .touch-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            z-index: 500;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .touch-hint.hidden {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
     <div class="viewer-container">
+        <!-- 桌面端侧边栏 -->
         <div class="sidebar">
             <div class="panel">
                 <h3>🏠 Apartment Information</h3>
@@ -250,7 +359,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 <p style="font-size: 12px; color: #666; margin: 8px 0 0 0;">${apartment.description}</p>
             </div>
 
-            <div class="panel">
+            <div class="panel" id="desktopControlPanel">
                 <h3>🎮 View Control</h3>
                 <div class="controls-group">
                     <button id="toggleControlModeBtn" class="btn full-width">
@@ -306,6 +415,9 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                     <div id="rotationInfo">View: 0°</div>
                     <div id="zoomInfo">Height: ${apartment.config.camera.height}m</div>
                 </div>
+                <div class="mobile-view-info">
+                    <div>${apartment.title}</div>
+                </div>
                 <div id="escExitPrompt" class="esc-prompt hidden">
                     Press ESC to exit FPS mode
                 </div>
@@ -316,6 +428,39 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 <div id="pointerLockPrompt" class="center-screen hidden">
                     <div class="prompt-content">
                         <button id="enterFPSBtn" class="btn full-width" style="font-size:1.1rem;padding:1em 2em;">Click to enable FPS control</button>
+                    </div>
+                </div>
+                <div id="touchHint" class="touch-hint hidden">
+                    <div>
+                        <p style="margin: 0 0 8px 0;">Touch Controls:</p>
+                        <p style="margin: 0; font-size: 12px;">
+                            Single finger: Rotate<br>
+                            Two fingers: Zoom/Pan
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 移动端底部控制栏 -->
+            <div class="mobile-controls" id="mobileControls">
+                <div class="mobile-controls-header">
+                    <h3 style="margin: 0; font-size: 16px;">Controls</h3>
+                    <button class="toggle-controls-btn" id="toggleMobileControlsBtn">
+                        <span id="toggleControlsText">▲</span>
+                    </button>
+                </div>
+                <div class="mobile-controls-content">
+                    <div class="mobile-panel">
+                        <div class="mobile-controls-grid">
+                            <button id="mobileViewTopBtn" class="btn small secondary">Top</button>
+                            <button id="mobileViewFrontBtn" class="btn small secondary">Front</button>
+                            <button id="mobileViewSideBtn" class="btn small secondary">Side</button>
+                        </div>
+                        <button id="mobileResetViewBtn" class="btn full-width small" style="margin-top: 8px;">Reset View</button>
+                    </div>
+                    <div class="mobile-panel">
+                        <button id="mobileToggleWireframeBtn" class="btn secondary full-width small">Toggle Wireframe</button>
+                        <button id="mobileScreenshotBtn" class="btn full-width small" style="margin-top: 8px;">Save Screenshot</button>
                     </div>
                 </div>
             </div>
@@ -338,6 +483,9 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             window.renderer.dispose();
         }
         
+        // 检测是否为移动设备
+        const isMobile = ${isMobileStr};
+        
         // 3D查看器初始化脚本
         let scene, camera, renderer, controls, model;
         let orbitControls, pointerLockControls;
@@ -357,8 +505,9 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         console.log('Apartment config received:', apartmentConfig);
         console.log('Config camera height:', apartmentConfig.camera.height);
         console.log('Config camera object:', apartmentConfig.camera);
+        console.log('Is mobile device:', isMobile);
         
-        // 键盘控制类 - 完整的WASD移动逻辑
+        // 键盘控制类 - 完整的WASD移动逻辑（桌面端才使用）
         class KeyboardControls {
             constructor(camera, scene, domElement) {
                 this.camera = camera;
@@ -571,7 +720,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 
                 // 创建渲染器
                 renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(window.innerWidth - 280, window.innerHeight);
+                
+                // 移动端调整渲染器大小
+                const rendererWidth = isMobile ? window.innerWidth : window.innerWidth - 280;
+                renderer.setSize(rendererWidth, window.innerHeight);
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 
@@ -597,6 +749,11 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 // 开始渲染循环
                 animate();
                 
+                // 移动端显示触控提示
+                if (isMobile) {
+                    showTouchHint();
+                }
+                
             } catch (error) {
                 console.error('初始化3D场景失败:', error);
                 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -613,18 +770,31 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             orbitControls.dampingFactor = 0.05;
             orbitControls.target.set(0, 0, 0);
             
-            // FPS控制器
-            pointerLockControls = new THREE.PointerLockControls(camera, renderer.domElement);
-            scene.add(pointerLockControls.getObject());
-            
-            // 键盘控制器
-            keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
-            keyboardControls.setFixedHeight(apartmentConfig.camera.height);
+            // 移动端特殊设置
+            if (isMobile) {
+                orbitControls.enablePan = true; // 允许平移
+                orbitControls.panSpeed = 0.5;
+                orbitControls.rotateSpeed = 0.7;
+                orbitControls.zoomSpeed = 0.8;
+                
+                // 移动端不创建FPS相关控制器
+                pointerLockControls = null;
+                keyboardControls = null;
+            } else {
+                // 桌面端才创建FPS控制器
+                pointerLockControls = new THREE.PointerLockControls(camera, renderer.domElement);
+                scene.add(pointerLockControls.getObject());
+                
+                // 键盘控制器
+                keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
+                keyboardControls.setFixedHeight(apartmentConfig.camera.height);
+                
+                pointerLockControls.enabled = false;
+                keyboardControls.disable();
+            }
             
             // 默认使用轨道控制器
             orbitControls.enabled = true;
-            pointerLockControls.enabled = false;
-            keyboardControls.disable();
         }
         
         function setupLighting() {
@@ -751,8 +921,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                         // 轨道控制器的目标点设置为模型中心
                         orbitControls.target.copy(center);
                         
-                        // 更新键盘控制器的固定高度为正确的值
-                        keyboardControls.setFixedHeight(cameraHeight);
+                        // 桌面端更新键盘控制器的固定高度
+                        if (keyboardControls) {
+                            keyboardControls.setFixedHeight(cameraHeight);
+                        }
                         
                         console.log('Model loaded. Floor height: ' + floorHeight.toFixed(2) + 'm, Camera height: ' + cameraHeight.toFixed(2) + 'm, Config height: ' + apartmentConfig.camera.height + 'm, Init point: [' + initX + ', ' + initZ + ']');
                         
@@ -776,43 +948,69 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function setupEventListeners() {
-            // 控制模式切换
-            document.getElementById('toggleControlModeBtn').addEventListener('click', toggleControlMode);
+            // 桌面端控制
+            if (!isMobile) {
+                // 控制模式切换
+                document.getElementById('toggleControlModeBtn').addEventListener('click', toggleControlMode);
+                
+                // FPS模式相关
+                document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
+                
+                // 指针锁定状态变化监听
+                document.addEventListener('pointerlockchange', onPointerLockChange);
+                document.addEventListener('pointerlockerror', onPointerLockError);
+                
+                // 键盘事件
+                document.addEventListener('keydown', onKeyDown);
+                
+                // 桌面端灯光控制
+                document.getElementById('brightnessSlider').addEventListener('input', adjustBrightness);
+                document.getElementById('resetLightingBtn').addEventListener('click', resetLighting);
+            }
             
+            // 通用控制（桌面端和移动端）
             // 视角按钮
-            document.getElementById('viewTopBtn').addEventListener('click', () => setView('top'));
-            document.getElementById('viewFrontBtn').addEventListener('click', () => setView('front'));
-            document.getElementById('viewSideBtn').addEventListener('click', () => setView('side'));
-            document.getElementById('resetViewBtn').addEventListener('click', resetView);
+            const viewTopBtn = document.getElementById(isMobile ? 'mobileViewTopBtn' : 'viewTopBtn');
+            const viewFrontBtn = document.getElementById(isMobile ? 'mobileViewFrontBtn' : 'viewFrontBtn');
+            const viewSideBtn = document.getElementById(isMobile ? 'mobileViewSideBtn' : 'viewSideBtn');
+            const resetViewBtn = document.getElementById(isMobile ? 'mobileResetViewBtn' : 'resetViewBtn');
+            const toggleWireframeBtn = document.getElementById(isMobile ? 'mobileToggleWireframeBtn' : 'toggleWireframeBtn');
+            const screenshotBtn = document.getElementById(isMobile ? 'mobileScreenshotBtn' : 'screenshotBtn');
             
-            // 线框模式
-            document.getElementById('toggleWireframeBtn').addEventListener('click', toggleWireframe);
+            if (viewTopBtn) viewTopBtn.addEventListener('click', () => setView('top'));
+            if (viewFrontBtn) viewFrontBtn.addEventListener('click', () => setView('front'));
+            if (viewSideBtn) viewSideBtn.addEventListener('click', () => setView('side'));
+            if (resetViewBtn) resetViewBtn.addEventListener('click', resetView);
+            if (toggleWireframeBtn) toggleWireframeBtn.addEventListener('click', toggleWireframe);
+            if (screenshotBtn) screenshotBtn.addEventListener('click', takeScreenshot);
             
-            // 截图
-            document.getElementById('screenshotBtn').addEventListener('click', takeScreenshot);
+            // 质量控制（桌面端）
+            if (!isMobile) {
+                document.getElementById('qualitySelector').addEventListener('change', changeQuality);
+            }
             
-            // 质量控制
-            document.getElementById('qualitySelector').addEventListener('change', changeQuality);
-            
-            // 灯光控制
-            document.getElementById('brightnessSlider').addEventListener('input', adjustBrightness);
-            document.getElementById('resetLightingBtn').addEventListener('click', resetLighting);
-            
-            // FPS模式相关
-            document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
-            
-            // 指针锁定状态变化监听
-            document.addEventListener('pointerlockchange', onPointerLockChange);
-            document.addEventListener('pointerlockerror', onPointerLockError);
-            
-            // 键盘事件
-            document.addEventListener('keydown', onKeyDown);
+            // 移动端控制栏折叠
+            if (isMobile) {
+                const toggleBtn = document.getElementById('toggleMobileControlsBtn');
+                const mobileControls = document.getElementById('mobileControls');
+                const toggleText = document.getElementById('toggleControlsText');
+                
+                if (toggleBtn && mobileControls) {
+                    toggleBtn.addEventListener('click', () => {
+                        mobileControls.classList.toggle('expanded');
+                        toggleText.textContent = mobileControls.classList.contains('expanded') ? '▼' : '▲';
+                    });
+                }
+            }
             
             // 窗口大小调整
             window.addEventListener('resize', onWindowResize);
         }
         
         function toggleControlMode() {
+            // 移动端不支持FPS模式
+            if (isMobile) return;
+            
             if (currentControlMode === 'orbit') {
                 // 切换到FPS模式
                 currentControlMode = 'fps';
@@ -965,8 +1163,11 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function onKeyDown(event) {
+            // 移动端不处理键盘事件
+            if (isMobile) return;
+            
             // 只处理ESC键，其他键让键盘控制器处理
-            if (event.code === 'Escape' && currentControlMode === 'fps' && pointerLockControls.enabled) {
+            if (event.code === 'Escape' && currentControlMode === 'fps' && pointerLockControls && pointerLockControls.enabled) {
                 exitPointerLock(); // 只退出指针锁定，不退出FPS模式
                 event.preventDefault();
                 event.stopPropagation();
@@ -974,9 +1175,10 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function onWindowResize() {
-            camera.aspect = (window.innerWidth - 280) / window.innerHeight;
+            const width = isMobile ? window.innerWidth : window.innerWidth - 280;
+            camera.aspect = width / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth - 280, window.innerHeight);
+            renderer.setSize(width, window.innerHeight);
         }
         
         function animate() {
@@ -986,7 +1188,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 orbitControls.update();
             }
             
-            // 更新键盘控制
+            // 更新键盘控制（桌面端）
             if (keyboardControls && currentControlMode === 'fps') {
                 keyboardControls.update();
             }
@@ -995,25 +1197,43 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         }
         
         function onPointerLockChange() {
+            // 移动端不处理指针锁定
+            if (isMobile || !pointerLockControls) return;
+            
             if (currentControlMode === 'fps') {
                 if (document.pointerLockElement === renderer.domElement) {
-                    // 进入指针锁定状态
+                    console.log('Pointer locked');
                     pointerLockControls.enabled = true;
                     keyboardControls.enable();
-                    document.getElementById('pointerLockPrompt').classList.add('hidden');
                     document.getElementById('escExitPrompt').classList.remove('hidden');
                 } else {
-                    // 退出指针锁定状态
+                    console.log('Pointer unlocked');
                     pointerLockControls.enabled = false;
                     keyboardControls.disable();
                     document.getElementById('escExitPrompt').classList.add('hidden');
-                    document.getElementById('pointerLockPrompt').classList.remove('hidden');
+                    if (currentControlMode === 'fps') {
+                        document.getElementById('pointerLockPrompt').classList.remove('hidden');
+                    }
                 }
             }
         }
         
         function onPointerLockError() {
-            console.error('Pointer lock failed');
+            // 移动端不处理指针锁定错误
+            if (isMobile) return;
+            
+            console.error('Pointer lock error');
+        }
+        
+        // 显示触控提示
+        function showTouchHint() {
+            const hint = document.getElementById('touchHint');
+            if (hint) {
+                hint.classList.remove('hidden');
+                setTimeout(() => {
+                    hint.classList.add('hidden');
+                }, 3000);
+            }
         }
         
         // 初始化

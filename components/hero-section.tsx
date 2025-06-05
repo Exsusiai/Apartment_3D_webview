@@ -133,8 +133,8 @@ export function HeroSection() {
       id="hero-section"
       className={`relative border-none overflow-hidden transition-all duration-700 ease-in-out ${
         hasViewedContent
-          ? "py-16 sm:py-20 md:py-24 pb-6 sm:pb-8 md:pb-12" // 已浏览过内容，使用较小高度
-          : "min-h-[calc(100vh-80px)] flex flex-col items-center justify-center" // 首次访问，使用全屏高度减去导航栏
+          ? "py-12 sm:py-16 md:py-24 pb-4 sm:pb-6 md:pb-12" // 已浏览过内容，使用较小高度，移动端进一步减小
+          : "min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)] flex flex-col items-center justify-center" // 首次访问，使用全屏高度减去导航栏
       }`}
     >
       {/* 新的动画背景 - 只在第一次访问时显示完整动画 */}
@@ -147,7 +147,7 @@ export function HeroSection() {
         className={`container mx-auto px-4 relative z-10 text-center ${hasViewedContent ? "" : "flex-grow flex flex-col justify-center"}`}
       >
         <h1
-          className={`text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 transition-all duration-1000 ease-out ${
+          className={`text-2xl sm:text-3xl md:text-4xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8 transition-all duration-1000 ease-out leading-tight ${
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[-20px]"
           } ${hasViewedContent ? "lg:text-5xl" : ""}`} // 已浏览过内容时使用较小字体
         >
@@ -162,12 +162,12 @@ export function HeroSection() {
             variant="outline"
             size={hasViewedContent ? "default" : "lg"} // 已浏览过内容时使用较小按钮
             className={`rounded-full transition-colors ${
-              hasViewedContent ? "px-4 py-2 text-sm" : "px-5 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 text-sm sm:text-base"
+              hasViewedContent ? "px-4 py-2 text-sm" : "px-4 py-3 sm:px-5 sm:py-4 md:px-8 md:py-6 text-xs sm:text-sm md:text-base"
             } font-medium border-gray-300 hover:bg-gray-100`}
             onClick={handleBrowseClick}
           >
             Browse
-            <ArrowRight className={`ml-2 ${hasViewedContent ? "h-3 w-3" : "h-4 w-4 sm:h-5 sm:w-5"}`} />
+            <ArrowRight className={`ml-2 ${hasViewedContent ? "h-3 w-3" : "h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5"}`} />
           </Button>
         </div>
       </div>
@@ -175,12 +175,12 @@ export function HeroSection() {
       {/* 向下滚动指示器 - 只在首次访问时显示 */}
       {!hasViewedContent && (
         <div
-          className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-1000 delay-500 ease-out ${
+          className={`absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-1000 delay-500 ease-out ${
             isLoaded ? "opacity-70 translate-y-0" : "opacity-0 translate-y-[20px]"
           }`}
         >
           <div className="animate-bounce">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M12 5V19M12 19L5 12M12 19L19 12"
                 stroke="currentColor"

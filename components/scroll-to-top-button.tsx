@@ -50,15 +50,16 @@ export function ScrollToTopButton() {
       variant="outline"
       size="icon"
       className={cn(
-        "fixed bottom-6 right-6 z-50 rounded-full p-3 shadow-md transition-all duration-300",
+        "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 rounded-full p-2.5 sm:p-3 shadow-md transition-all duration-300",
         "bg-white/80 backdrop-blur-sm hover:bg-gray-100",
         "border border-gray-200",
+        "w-10 h-10 sm:w-12 sm:h-12", // 移动端更小的尺寸
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none",
       )}
       onClick={scrollToTop}
       aria-label="Back to top"
     >
-      <ArrowUp className="h-5 w-5" />
+      <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5" />
     </Button>
   )
 }
