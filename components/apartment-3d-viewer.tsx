@@ -15,20 +15,45 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
   const [error, setError] = useState<string | null>(null)
   const [iframeKey, setIframeKey] = useState(0) // 添加key来强制重新创建iframe
   const [isMobile, setIsMobile] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    // 检测是否为移动设备
-    setIsMobile(isMobileDevice())
+    // 确保在客户端执行
+    setIsClient(true)
     
+    // 延迟检测设备类型，确保DOM完全加载
+    const detectDevice = () => {
+      const mobile = isMobileDevice()
+      console.log('Device detection result:', mobile) // 调试日志
+      setIsMobile(mobile)
+    }
+    
+    // 立即检测一次
+    detectDevice()
+    
+    // 监听窗口大小变化
     const handleResize = () => {
-      setIsMobile(isMobileDevice())
+      detectDevice()
+    }
+    
+    // 监听设备方向变化
+    const handleOrientationChange = () => {
+      setTimeout(detectDevice, 100) // 延迟检测，等待方向变化完成
     }
     
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleOrientationChange)
+    
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleOrientationChange)
+    }
   }, [])
 
   useEffect(() => {
+    // 只有在客户端且设备检测完成后才创建iframe内容
+    if (!isClient) return
+    
     if (!apartment.hasModel) {
       setError("This apartment currently has no 3D model")
       setIsLoading(false)
@@ -44,6 +69,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
       // 创建3D查看器的HTML内容
       const create3DViewerHTML = () => {
         const isMobileStr = isMobile ? 'true' : 'false';
+        console.log('Creating 3D viewer with mobile setting:', isMobileStr) // 调试日志
         
         return `
 <!DOCTYPE html>
@@ -347,6 +373,58 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         .touch-hint.hidden {
             opacity: 0;
         }
+        
+        /* 移动端持续操作提示 */
+        .mobile-operation-hint {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 150;
+            display: ${isMobile ? 'block' : 'none'};
+            max-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-operation-hint.minimized {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        .mobile-operation-hint.minimized .hint-content {
+            display: none;
+        }
+        
+        .mobile-operation-hint.minimized .hint-title {
+            font-size: 11px;
+        }
+        
+        .hint-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .hint-content {
+            line-height: 1.4;
+        }
+        
+        .hint-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -437,6 +515,25 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                             Single finger: Rotate<br>
                             Two fingers: Zoom/Pan
                         </p>
+                    </div>
+                </div>
+                
+                <!-- 移动端持续操作提示 -->
+                <div id="mobileOperationHint" class="mobile-operation-hint">
+                    <div class="hint-title" onclick="toggleOperationHint()">
+                        <span>操作提示</span>
+                        <button class="hint-toggle" id="hintToggleBtn">−</button>
+                    </div>
+                    <div class="hint-content" id="hintContent">
+                        <div style="margin-bottom: 4px;">
+                            <strong>👆 单指:</strong> 旋转视角
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <strong>✌️ 双指:</strong> 缩放/平移
+                        </div>
+                        <div style="font-size: 10px; color: #ccc; margin-top: 6px;">
+                            点击此区域可收起/展开
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1225,14 +1322,27 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
             console.error('Pointer lock error');
         }
         
-        // 显示触控提示
+        // 切换操作提示显示状态
+        function toggleOperationHint() {
+            if (!isMobile) return;
+            
+            const hint = document.getElementById('mobileOperationHint');
+            const toggleBtn = document.getElementById('hintToggleBtn');
+            
+            if (hint && toggleBtn) {
+                hint.classList.toggle('minimized');
+                toggleBtn.textContent = hint.classList.contains('minimized') ? '+' : '−';
+            }
+        }
+        
+        // 显示触控提示（保持原有的临时提示，但时间缩短）
         function showTouchHint() {
             const hint = document.getElementById('touchHint');
             if (hint) {
                 hint.classList.remove('hidden');
                 setTimeout(() => {
                     hint.classList.add('hidden');
-                }, 3000);
+                }, 2000); // 缩短到2秒，因为现在有持续的操作提示
             }
         }
         
@@ -1260,7 +1370,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
     return () => {
       clearTimeout(timer)
     }
-  }, [apartment, iframeKey]) // 添加iframeKey作为依赖
+  }, [apartment, iframeKey, isMobile, isClient]) // 添加isMobile和isClient作为依赖
 
   // 组件卸载时重置iframe key来强制重新创建
   useEffect(() => {

@@ -8,6 +8,7 @@ import { AboutSection } from "@/components/about-section"
 import { ScrollToTopButton } from "@/components/scroll-to-top-button"
 import { SessionState } from "@/utils/state-utils"
 import { PageFixer } from "@/utils/page-fix"
+import { DebugPanel } from "@/components/debug-panel"
 
 export default function Home() {
   // 添加滚动状态
@@ -108,22 +109,13 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="flex flex-col border-none">
-        <HeroSection />
-        {/* 添加淡入动画效果给公寓画廊 */}
-        <div
-          className={`transition-all duration-1000 ease-in-out ${
-            hasScrolled || hasViewedContent ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <ApartmentGallery />
-        </div>
-        {/* About部分 - 总是可见，不需要延迟加载 */}
-        <AboutSection />
-      </div>
+      <DebugPanel />
+      <HeroSection />
+      <ApartmentGallery />
+      <AboutSection />
       <ScrollToTopButton />
-    </main>
+    </div>
   )
 }
