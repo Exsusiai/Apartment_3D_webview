@@ -15,20 +15,45 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
   const [error, setError] = useState<string | null>(null)
   const [iframeKey, setIframeKey] = useState(0) // 添加key来强制重新创建iframe
   const [isMobile, setIsMobile] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    // 检测是否为移动设备
-    setIsMobile(isMobileDevice())
+    // 确保在客户端执行
+    setIsClient(true)
     
+    // 延迟检测设备类型，确保DOM完全加载
+    const detectDevice = () => {
+      const mobile = isMobileDevice()
+      console.log('Device detection result:', mobile) // 调试日志
+      setIsMobile(mobile)
+    }
+    
+    // 立即检测一次
+    detectDevice()
+    
+    // 监听窗口大小变化
     const handleResize = () => {
-      setIsMobile(isMobileDevice())
+      detectDevice()
+    }
+    
+    // 监听设备方向变化
+    const handleOrientationChange = () => {
+      setTimeout(detectDevice, 100) // 延迟检测，等待方向变化完成
     }
     
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleOrientationChange)
+    
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleOrientationChange)
+    }
   }, [])
 
   useEffect(() => {
+    // 只有在客户端且设备检测完成后才创建iframe内容
+    if (!isClient) return
+    
     if (!apartment.hasModel) {
       setError("This apartment currently has no 3D model")
       setIsLoading(false)
@@ -44,6 +69,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
       // 创建3D查看器的HTML内容
       const create3DViewerHTML = () => {
         const isMobileStr = isMobile ? 'true' : 'false';
+        console.log('Creating 3D viewer with mobile setting:', isMobileStr) // 调试日志
         
         return `
 <!DOCTYPE html>
@@ -1260,7 +1286,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
     return () => {
       clearTimeout(timer)
     }
-  }, [apartment, iframeKey]) // 添加iframeKey作为依赖
+  }, [apartment, iframeKey, isMobile, isClient]) // 添加isMobile和isClient作为依赖
 
   // 组件卸载时重置iframe key来强制重新创建
   useEffect(() => {
