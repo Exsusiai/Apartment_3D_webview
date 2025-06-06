@@ -782,15 +782,15 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                 keyboardControls = null;
             } else {
                 // 桌面端才创建FPS控制器
-                pointerLockControls = new THREE.PointerLockControls(camera, renderer.domElement);
-                scene.add(pointerLockControls.getObject());
-                
-                // 键盘控制器
-                keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
-                keyboardControls.setFixedHeight(apartmentConfig.camera.height);
-                
-                pointerLockControls.enabled = false;
-                keyboardControls.disable();
+            pointerLockControls = new THREE.PointerLockControls(camera, renderer.domElement);
+            scene.add(pointerLockControls.getObject());
+            
+            // 键盘控制器
+            keyboardControls = new KeyboardControls(camera, scene, renderer.domElement);
+            keyboardControls.setFixedHeight(apartmentConfig.camera.height);
+            
+            pointerLockControls.enabled = false;
+            keyboardControls.disable();
             }
             
             // 默认使用轨道控制器
@@ -923,7 +923,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                         
                         // 桌面端更新键盘控制器的固定高度
                         if (keyboardControls) {
-                            keyboardControls.setFixedHeight(cameraHeight);
+                        keyboardControls.setFixedHeight(cameraHeight);
                         }
                         
                         console.log('Model loaded. Floor height: ' + floorHeight.toFixed(2) + 'm, Camera height: ' + cameraHeight.toFixed(2) + 'm, Config height: ' + apartmentConfig.camera.height + 'm, Init point: [' + initX + ', ' + initZ + ']');
@@ -950,18 +950,18 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
         function setupEventListeners() {
             // 桌面端控制
             if (!isMobile) {
-                // 控制模式切换
-                document.getElementById('toggleControlModeBtn').addEventListener('click', toggleControlMode);
-                
-                // FPS模式相关
-                document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
-                
-                // 指针锁定状态变化监听
-                document.addEventListener('pointerlockchange', onPointerLockChange);
-                document.addEventListener('pointerlockerror', onPointerLockError);
-                
-                // 键盘事件
-                document.addEventListener('keydown', onKeyDown);
+            // 控制模式切换
+            document.getElementById('toggleControlModeBtn').addEventListener('click', toggleControlMode);
+            
+            // FPS模式相关
+            document.getElementById('enterFPSBtn').addEventListener('click', enterFPSMode);
+            
+            // 指针锁定状态变化监听
+            document.addEventListener('pointerlockchange', onPointerLockChange);
+            document.addEventListener('pointerlockerror', onPointerLockError);
+            
+            // 键盘事件
+            document.addEventListener('keydown', onKeyDown);
                 
                 // 桌面端灯光控制
                 document.getElementById('brightnessSlider').addEventListener('input', adjustBrightness);
@@ -1212,7 +1212,7 @@ export function Apartment3DViewer({ apartment, onClose }: Apartment3DViewerProps
                     keyboardControls.disable();
                     document.getElementById('escExitPrompt').classList.add('hidden');
                     if (currentControlMode === 'fps') {
-                        document.getElementById('pointerLockPrompt').classList.remove('hidden');
+                    document.getElementById('pointerLockPrompt').classList.remove('hidden');
                     }
                 }
             }

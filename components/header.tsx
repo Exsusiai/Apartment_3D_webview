@@ -94,7 +94,7 @@ export function Header() {
     >
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex flex-col gap-1">
-          <a href="#" onClick={scrollToTop} className="flex items-start gap-2 sm:gap-3">
+          <a href="#" onClick={scrollToTop} className="flex items-center gap-2 sm:gap-3">
             {/* Logo部分 */}
             <div className="flex-shrink-0">
               <Image
@@ -105,13 +105,13 @@ export function Header() {
                 className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
               />
             </div>
-            {/* 主标题部分 - 与logo同高 */}
-            <div className="flex flex-col justify-between h-8 sm:h-10">
-              <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-none">Rooms</h1>
-              <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-none">I've Lived</h1>
+            {/* 主标题部分 - 自然排列 */}
+            <div className="flex flex-col gap-0">
+              <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-tight">Rooms</h1>
+              <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-tight">I've Lived</h1>
             </div>
           </a>
-          {/* 副标题部分 - 独占一行，与整个上方区块对齐 */}
+          {/* 副标题部分 - 独占一行，适中的间距 */}
           <p className="text-[10px] sm:text-xs text-gray-600 ml-0">A 3D Remembrance Project</p>
         </div>
         
