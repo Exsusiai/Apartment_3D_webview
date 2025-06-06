@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer"
 import { getApartments, ApartmentData } from "@/utils/apartment-data"
 import { Apartment3DViewer } from "@/components/apartment-3d-viewer"
+import { getDeviceType } from "@/utils/device-utils"
 
 function ApartmentCard({
   apartment,
@@ -26,13 +27,26 @@ function ApartmentCard({
   const isEven = index % 2 === 0
   const [selectedApartment, setSelectedApartment] = useState<ApartmentData | null>(null)
   const [showNoModelMessage, setShowNoModelMessage] = useState(false)
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
+
+  // 检测设备类型
+  useEffect(() => {
+    const updateDeviceType = () => {
+      setDeviceType(getDeviceType())
+    }
+    
+    updateDeviceType()
+    window.addEventListener('resize', updateDeviceType)
+    
+    return () => window.removeEventListener('resize', updateDeviceType)
+  }, [])
 
   // 计算卡片间距和位置
   const spacingClass = cn(
     "relative transition-all duration-700",
-    // 垂直间距 - 第一个卡片紧贴hero section，确保滚动后Browse按钮不可见
-    index === 0 ? "mt-0" : "", // 从mt-4改为mt-0，让第一个卡片更贴近hero section
-    !isLast ? "mb-24 md:mb-28 lg:mb-32" : "mb-16", // 确保最后一个卡片也有底部间距
+    // 垂直间距 - 移动端减少间距
+    index === 0 ? "mt-0" : "",
+    !isLast ? (deviceType === 'mobile' ? "mb-12" : "mb-24 md:mb-28 lg:mb-32") : "mb-16",
     // 动画效果
     isIntersecting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16",
   )
@@ -58,6 +72,93 @@ function ApartmentCard({
     ));
   };
 
+  // 移动端布局 - 垂直堆叠
+  if (deviceType === 'mobile') {
+    return (
+      <>
+        <div
+          ref={ref as React.RefObject<HTMLDivElement>}
+          className={spacingClass}
+          id={index === 0 ? "first-apartment-card" : undefined}
+        >
+          <div className="px-4">
+            {/* 移动端：图片在上 */}
+            <div
+              className={cn(
+                "relative w-full h-48 sm:h-56 overflow-hidden rounded-lg border border-gray-100 mb-4",
+                apartment.hasModel ? "cursor-pointer" : "cursor-default"
+              )}
+              onClick={handleCardClick}
+            >
+              <div className={cn(
+                "absolute inset-0 transition-colors z-10",
+                apartment.hasModel ? "bg-black/5 hover:bg-black/0" : "bg-black/10"
+              )} />
+              {apartment.hasModel && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20">
+                  <span className="px-3 py-2 bg-white/90 rounded-md text-xs font-medium">View 3D Model</span>
+                </div>
+              )}
+              <div className={cn(
+                "h-full w-full transition-transform duration-500",
+                apartment.hasModel ? "hover:scale-105" : ""
+              )}>
+                <img
+                  src={apartment.thumbnail || "/placeholder.svg"}
+                  alt={apartment.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+            
+            {/* 移动端：文字在下 */}
+            <div className="text-left">
+              <h3 className="text-lg font-medium mb-2 text-gray-900">{apartment.title}</h3>
+              <p className="text-sm text-gray-600 mb-3">{formatDescription(apartment.description)}</p>
+              {apartment.hasModel && (
+                <button
+                  onClick={handleCardClick}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                >
+                  View 3D Model
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 无模型提示消息 */}
+        {showNoModelMessage && (
+          <div className="fixed top-4 left-4 right-4 z-50 bg-blue-100 border border-blue-300 px-4 py-3 rounded-lg shadow-lg">
+            <p className="text-blue-800 text-sm font-medium text-center">
+              The 3D model for {apartment.title} is being prepared, stay tuned!
+            </p>
+          </div>
+        )}
+
+        {/* 3D查看器对话框 - 移动端全屏 */}
+        <Dialog open={!!selectedApartment} onOpenChange={(open) => !open && setSelectedApartment(null)}>
+          <DialogContent className={cn(
+            deviceType === 'mobile' 
+              ? "max-w-none w-full h-[100dvh] p-0 rounded-none" 
+              : "max-w-7xl w-[95vw] h-[90vh] p-0"
+          )}>
+            <DialogTitle className="sr-only">
+              {selectedApartment?.title} 3D Model
+            </DialogTitle>
+            {selectedApartment && (
+              <Apartment3DViewer
+                apartment={selectedApartment}
+                onClose={() => setSelectedApartment(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </>
+    )
+  }
+
+  // 桌面端和平板端布局 - 保持原有设计
   return (
     <>
       <div
